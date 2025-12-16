@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Holiday Word Search</title>
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #ffffff;
+    margin: 0;
+    padding: 20px;
+  }
+
+  h2 {
+    text-align: center;
+    margin-bottom: 6px;
+  }
+
+  .instructions {
+    text-align: center;
+    color: #555;
+    margin-bottom: 16px;
+  }
+
+  .game-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    justify-content: center;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(14, 36px);
+    gap: 4px;
+  }
+
+  .cell {
+    width: 36px;
+    height: 36px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    text-align: center;
+    line-height: 36px;
+    font-weight: bold;
+    cursor: pointer;
+    background: #fff;
+    user-select: none;
+  }
+
+  .cell.selected {
+    background: #ffe9a6;
+    border-color: #c9a63a;
+  }
+
+  .cell.found {
+    background: #a6dad2;
+    border-color: #2a7b6f;
+    cursor: default;
+  }
+
+  .words {
+    max-width: 300px;
+  }
+
+  .word {
+    display: inline-block;
+    padding: 6px 10px;
+    margin: 4px;
+    border: 1px solid #ddd;
+    border-radius: 999px;
+    font-weight: bold;
+    background: #fafafa;
+  }
+
+  .word.found {
+    background: #d9f3e4;
+    border-color: #7ac79a;
+    text-decoration: line-through;
+    opacity: 0.9;
+  }
+
+  .controls {
+    text-align: center;
+    margin-top: 18px;
+  }
+
+  button {
+    padding: 10px 14px;
+    margin: 4px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 15px;
+  }
+
+  .check { background: #a6dad2; }
+  .hint  { background: #ffe9a6; }
+  .clear { background: #e6e6e6; }
+  .new   { background: #f5a6a6; }
+
+  .feedback {
+    text-align: center;
+    font-weight: bold;
+    margin-top: 10px;
+    min-height: 22px;
+  }
+
+  .progress {
+    text-align: center;
+    color: #2a7b6f;
+    font-weight: bold;
+    margin-top: 4px;
+  }
+</style>
+</head>
+
+<body>
+
+<h2>Holiday Word Search</h2>
+<div class="instructions">
+Tap letters in a straight line (up, down, left, right, or diagonal). Then press Check.
+</div>
+
+<div class="game-wrap">
+  <div>
+    <div id="grid" class="grid"></div>
+
+    <div class="controls">
+      <button class="check" onclick="checkWord()">Check</button>
+      <button class="hint" onclick="giveHint()">Hint</button>
+      <button class="clear" onclick="clearSelection()">Clear</button>
+      <button class="new" onclick="newPuzzle()">New Puzzle</button>
+    </div>
+
+    <div class="feedback" id="feedback"></div>
+    <div class="progress" id="progress"></div>
+  </div>
+
+  <div class="words">
+    <h3>Find these words</h3>
+    <div id="wordList"></div>
+  </div>
+</div>
+
+<script>
+const SIZE = 14;
+const WORDS = [
+  "SANTA","REINDEER","ELVES","SNOW","NOEL","CAROL",
+  "TINSEL","HOLLY","WREATH","GIFTS","SLEIGH","COCOA"
+];
+
+let grid = [];
+let placements = [];
+let selected = [];
+let found = new Set();
+
+const gridEl = document.getElementById("grid");
+const wordListEl = document.getElementById("wordList");
+const feedbackEl = document.getElementById("feedback");
+const progressEl = document.getElementById("progress");
+
+function randomInt(n) { return Math.floor(Math.random() * n); }
+
+function generateGrid() {
+  grid = Array.from({length: SIZE}, () => Array(SIZE).fill(""));
+  placements = [];
+  found.clear();
+  selected = [];
+
+  wordListEl.innerHTML = "";
+  WORDS.forEach(w => {
+    const span = document.createElement("span");
+    span.className = "word";
+    span.textContent = w;
+    span.dataset.word = w;
+    wordListEl.appendChild(span);
+  });
+
+  WORDS.sort((a,b) => b.length - a.length).forEach(placeWord);
+  fillRandomLetters();
+  renderGrid();
+  updateProgress();
+}
+
+function placeWord(word) {
+  const dirs = [
+    [0,1],[1,0],[0,-1],[-1,0],
+    [1,1],[1,-1],[-1,1],[-1,-1]
+  ];
+
+  for (let i=0;i<500;i++) {
+    const dir = dirs[randomInt(dirs.length)];
+    const r = randomInt(SIZE);
+    const c = randomInt(SIZE);
+    let cells = [];
+    let ok = true;
+
+    for (let j=0;j<word.length;j++) {
+      const rr = r + dir[0]*j;
+      const cc = c + dir[1]*j;
+      if (rr<0 || cc<0 || rr>=SIZE || cc>=SIZE) { ok=false; break; }
+      if (grid[rr][cc] && grid[rr][cc] !== word[j]) { ok=false; break; }
+      cells.push({r:rr,c:cc});
+    }
+
+    if (ok) {
+      cells.forEach((p,i) => grid[p.r][p.c] = word[i]);
+      placements.push({word, cells, found:false});
+      return;
+    }
+  }
+}
+
+function fillRandomLetters() {
+  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  for (let r=0;r<SIZE;r++) {
+    for (let c=0;c<SIZE;c++) {
+      if (!grid[r][c]) grid[r][c] = letters[randomInt(letters.length)];
+    }
+  }
+}
+
+function renderGrid() {
+  gridEl.innerHTML = "";
+  gridEl.style.gridTemplateColumns = `repeat(${SIZE}, 36px)`;
+
+  for (let r=0;r<SIZE;r++) {
+    for (let c=0;c<SIZE;c++) {
+      const div = document.createElement("div");
+      div.className = "cell";
+      div.textContent = grid[r][c];
+      div.dataset.r = r;
+      div.dataset.c = c;
+      div.onclick = () => toggleCell(div);
+      gridEl.appendChild(div);
+    }
+  }
+}
+
+function toggleCell(cell) {
+  if (cell.classList.contains("found")) return;
+  const r = +cell.dataset.r;
+  const c = +cell.dataset.c;
+  const idx = selected.findIndex(p => p.r===r && p.c===c);
+  if (idx >= 0) {
+    selected.splice(idx,1);
+    cell.classList.remove("selected");
+  } else {
+    selected.push({r,c});
+    cell.classList.add("selected");
+  }
+}
+
+function checkWord() {
+  if (selected.length < 2) return;
+  const letters = selected.map(p => grid[p.r][p.c]).join("");
+  const rev = letters.split("").reverse().join("");
+
+  const hit = placements.find(p => !p.found && (p.word === letters || p.word === rev));
+  if (hit) {
+    hit.found = true;
+    found.add(hit.word);
+    hit.cells.forEach(p => {
+      const cell = document.querySelector(`.cell[data-r="${p.r}"][data-c="${p.c}"]`);
+      cell.classList.remove("selected");
+      cell.classList.add("found");
+    });
+    document.querySelector(`.word[data-word="${hit.word}"]`).classList.add("found");
+    feedbackEl.textContent = "Found: " + hit.word;
+    updateProgress();
+  } else {
+    feedbackEl.textContent = "Not a hidden word. Try again.";
+    clearSelection();
+  }
+}
+
+function clearSelection() {
+  selected.forEach(p => {
+    document.querySelector(`.cell[data-r="${p.r}"][data-c="${p.c}"]`).classList.remove("selected");
+  });
+  selected = [];
+}
+
+function giveHint() {
+  const remaining = placements.filter(p => !p.found);
+  if (!remaining.length) return;
+  feedbackEl.textContent = "Hint: Look for " + remaining[0].word;
+}
+
+function updateProgress() {
+  progressEl.textContent = `Found ${found.size} of ${WORDS.length}`;
+  if (found.size === WORDS.length) feedbackEl.textContent = "Puzzle complete!";
+}
+
+function newPuzzle() {
+  feedbackEl.textContent = "";
+  generateGrid();
+}
+
+generateGrid();
+</script>
+
+</body>
+</html>
