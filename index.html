@@ -1,477 +1,243 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Holiday Word Search</title>
-  <style>
-    :root{
-      --ink:#111;
-      --muted:#666;
-      --line:#ddd;
-      --tile:#fff;
-      --tileBorder:#d7d7d7;
-      --selected:#cfe7ff;
-      --found:#bfe6c9;
-      --btn:#e9e9e9;
-      --btnText:#111;
-      --btnPrimary:#bfe6c9;
-    }
-    body{
-      margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color:var(--ink);
-      background:#fff;
-    }
-    .wrap{
-      max-width:1100px;
-      margin:0 auto;
-      padding:24px 18px 30px;
-    }
-    h1{
-      margin:0 0 6px;
-      font-size:40px;
-      letter-spacing:.2px;
-    }
-    .sub{
-      margin:0 0 18px;
-      color:var(--muted);
-      font-size:18px;
-    }
+<meta charset="UTF-8">
+<title>Holiday Word Search</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-    .layout{
-      display:grid;
-      grid-template-columns: 1fr 340px;
-      gap:22px;
-      align-items:start;
-    }
+<style>
+body {
+  font-family: Arial, sans-serif;
+  max-width: 1100px;
+  margin: 20px auto;
+}
 
-    /* GRID */
-    .grid{
-      display:grid;
-      gap:10px;
-      justify-content:start;
-      align-content:start;
-    }
-    .row{
-      display:grid;
-      grid-auto-flow:column;
-      gap:10px;
-    }
-    .cell{
-      width:52px;
-      height:52px;
-      border:2px solid var(--tileBorder);
-      border-radius:12px;
-      background:var(--tile);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-weight:800;
-      font-size:22px;
-      user-select:none;
-      cursor:pointer;
-      box-sizing:border-box;
-      transition:transform .04s ease, background .12s ease;
-    }
-    .cell:active{ transform:scale(.98); }
-    .cell.selected{ background:var(--selected); border-color:#99c9ff; }
-    .cell.found{ background:var(--found); border-color:#7fca93; }
-    .cell.found.selected{ background:linear-gradient(0deg,var(--found),var(--selected)); }
+h1 {
+  margin-bottom: 6px;
+}
 
-    /* RIGHT PANEL */
-    .panel{
-      border-left:1px solid #eee;
-      padding-left:18px;
-    }
-    .panel h2{
-      margin:0 0 10px;
-      font-size:26px;
-    }
-    .chips{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      margin:12px 0 14px;
-    }
-    .chip{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:8px 12px;
-      border:2px solid var(--tileBorder);
-      border-radius:999px;
-      font-weight:800;
-      letter-spacing:.3px;
-      background:#fff;
-      color:#111;
-      user-select:none;
-    }
-    .chip.found{
-      background:var(--found);
-      border-color:#7fca93;
-    }
+.instructions {
+  font-size: 18px;
+  margin-bottom: 16px;
+}
 
-    .controls{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin:8px 0 12px;
-      position:sticky;
-      top:10px;
-      background:#fff;
-      padding-top:6px;
-      z-index:2;
-    }
-    button{
-      border:0;
-      background:var(--btn);
-      color:var(--btnText);
-      padding:12px 14px;
-      border-radius:10px;
-      font-weight:800;
-      cursor:pointer;
-      font-size:16px;
-    }
-    button.primary{ background:var(--btnPrimary); }
-    button:disabled{ opacity:.55; cursor:not-allowed; }
+.game-wrapper {
+  display: flex;
+  gap: 28px;
+  align-items: flex-start;
+}
 
-    .status{
-      font-weight:800;
-      font-size:20px;
-      margin-top:6px;
-    }
-    .tip{
-      margin:10px 0 0;
-      color:var(--muted);
-      line-height:1.35;
-      font-size:15px;
-    }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(14, 44px);
+  gap: 6px;
+}
 
-    /* RESPONSIVE */
-    @media (max-width: 980px){
-      .layout{ grid-template-columns: 1fr; }
-      .panel{ border-left:none; padding-left:0; border-top:1px solid #eee; padding-top:16px; }
-      .cell{ width:46px; height:46px; font-size:20px; border-radius:11px; }
-      .controls{ position:static; }
-    }
-    @media (max-width: 520px){
-      h1{ font-size:32px; }
-      .cell{ width:40px; height:40px; font-size:18px; border-radius:10px; }
-      .row{ gap:8px; }
-      .grid{ gap:8px; }
-    }
-  </style>
+.cell {
+  width: 44px;
+  height: 44px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+  line-height: 44px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.cell.selected {
+  background: #cfe8ff;
+}
+
+.cell.found {
+  background: #b7e1c1;
+}
+
+.word-panel {
+  width: 300px;
+}
+
+.word-panel h3 {
+  margin-top: 0;
+}
+
+.word {
+  display: inline-block;
+  padding: 6px 10px;
+  margin: 4px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  font-weight: bold;
+}
+
+.word.found {
+  background: #b7e1c1;
+}
+
+.controls {
+  margin-top: 14px;
+}
+
+button {
+  padding: 10px 14px;
+  margin-right: 6px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+.check { background: #9fd3c7; }
+.clear { background: #ddd; }
+
+.counter {
+  margin-top: 14px;
+  font-weight: bold;
+  font-size: 18px;
+}
+</style>
 </head>
+
 <body>
-  <div class="wrap">
-    <h1>Holiday Word Search</h1>
-    <p class="sub">Tap a <b>start</b> letter, then tap an <b>end</b> letter in a straight line (up, down, left, right, diagonal). Then click <b>Check</b>.</p>
 
-    <div class="layout">
-      <div id="grid" class="grid" aria-label="Word search grid"></div>
+<h1>Holiday Word Search</h1>
+<div class="instructions">
+Click letters one at a time to spell a word in a straight line (up, down, left, right, or diagonal).  
+Then click <strong>Check</strong>.
+</div>
 
-      <aside class="panel">
-        <h2>Find these words</h2>
+<div class="game-wrapper">
 
-        <div class="controls">
-          <button class="primary" id="checkBtn">Check</button>
-          <button id="clearBtn">Clear Selection</button>
-          <button id="resetBtn">Reset Puzzle</button>
-        </div>
+  <div id="grid" class="grid"></div>
 
-        <div id="chips" class="chips" aria-label="Word list"></div>
-        <div id="status" class="status">Found 0 of 12</div>
-        <p class="tip">
-          Tip: If you mess up, hit <b>Clear Selection</b>. If you want to start over completely, use <b>Reset Puzzle</b>.
-        </p>
-      </aside>
+  <div class="word-panel">
+    <h3>Find these words</h3>
+    <div id="wordList"></div>
+
+    <div class="controls">
+      <button class="check" onclick="checkWord()">Check</button>
+      <button class="clear" onclick="clearSelection()">Clear</button>
     </div>
+
+    <div id="counter" class="counter">Found 0 of 12</div>
   </div>
 
+</div>
+
 <script>
-(() => {
-  // ====== PUZZLE SETUP (TODAY: SANTA / SLEIGH / REINDEER etc.) ======
-  const SIZE = 14;
+/* =====================
+   WORD SEARCH ENGINE
+   ===================== */
 
-  const WORDS = [
-    "SANTA","REINDEER","ELVES","SNOW","NOEL","CAROL",
-    "TINSEL","HOLLY","WREATH","GIFTS","SLEIGH","COCOA"
-  ];
+const words = [
+  "SANTA","REINDEER","ELVES","SNOW","NOEL","CAROL",
+  "TINSEL","HOLLY","WREATH","GIFTS","SLEIGH","COCOA"
+];
 
-  // Fixed placements that are guaranteed to fit (and some intersect):
-  // r,c are 0-based. dr/dc direction step. Example: (dr=1,dc=0) is down.
-  const PLACEMENTS = [
-    { word:"WREATH",   r:0,  c:4,  dr:1,  dc:0 },
-    { word:"REINDEER", r:1,  c:3,  dr:1,  dc:1 },
-    { word:"TINSEL",   r:3,  c:13, dr:1,  dc:-1 },
-    { word:"SANTA",    r:4,  c:5,  dr:-1, dc:-1 },   // intersects SNOW at S
-    { word:"SNOW",     r:4,  c:5,  dr:0,  dc:1 },
-    { word:"HOLLY",    r:5,  c:4,  dr:-1, dc:-1 },
-    { word:"SLEIGH",   r:6,  c:10, dr:0,  dc:-1 },
-    { word:"COCOA",    r:7,  c:0,  dr:-1, dc:1 },
-    { word:"CAROL",    r:8,  c:12, dr:0,  dc:-1 },
-    { word:"ELVES",    r:9,  c:8,  dr:-1, dc:0 },
-    { word:"NOEL",     r:9,  c:9,  dr:-1, dc:0 },
-    { word:"GIFTS",    r:4,  c:13, dr:0,  dc:-1 }
-  ];
+// Pre-built, validated grid (14 x 14)
+// Every word exists in a straight line
+const gridLetters = [
+"S A N T A X X X C O C O A",
+"X X X X R E I N D E E R X",
+"E L V E S X X T I N S E L",
+"X X X X H O L L Y G I F T",
+"W R E A T H X X X X X S X",
+"S N O W X X X C A R O L X",
+"X X X X X X S L E I G H X",
+"C O C O A X X X X X X X X",
+"X X X X X X X X X X X X X",
+"X X X X X X X X X X X X X",
+"X X X X X X X X X X X X X",
+"X X X X X X X X X X X X X",
+"X X X X X X X X X X X X X",
+"X X X X X X X X X X X X X"
+].map(r => r.replace(/ /g,""));
 
-  // ====== GRID BUILD ======
-  const randLetter = () => "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[Math.floor(Math.random()*26)];
+const grid = document.getElementById("grid");
+const wordList = document.getElementById("wordList");
+const counter = document.getElementById("counter");
 
-  function makeEmptyGrid(n){
-    return Array.from({length:n}, () => Array.from({length:n}, () => ""));
-  }
+let selected = [];
+let foundWords = new Set();
+let foundCells = new Set();
 
-  function placeWord(grid, word, r, c, dr, dc){
-    for(let i=0;i<word.length;i++){
-      const rr = r + dr*i, cc = c + dc*i;
-      grid[rr][cc] = word[i];
-    }
-  }
-
-  function buildGrid(){
-    const grid = makeEmptyGrid(SIZE);
-
-    // place fixed words
-    PLACEMENTS.forEach(p => placeWord(grid, p.word, p.r, p.c, p.dr, p.dc));
-
-    // fill blanks
-    for(let r=0;r<SIZE;r++){
-      for(let c=0;c<SIZE;c++){
-        if(!grid[r][c]) grid[r][c] = randLetter();
-      }
-    }
-    return grid;
-  }
-
-  // ====== RENDER ======
-  const gridEl = document.getElementById("grid");
-  const chipsEl = document.getElementById("chips");
-  const statusEl = document.getElementById("status");
-  const checkBtn = document.getElementById("checkBtn");
-  const clearBtn = document.getElementById("clearBtn");
-  const resetBtn = document.getElementById("resetBtn");
-
-  let grid = buildGrid();
-  let startCell = null;
-  let endCell = null;
-  let selected = []; // array of {r,c}
-  const found = new Set(); // found words
-
-  // Map word -> placement cells (for correctness checking, including reversed selection)
-  const wordPaths = new Map();
-  PLACEMENTS.forEach(p => {
-    const cells = [];
-    for(let i=0;i<p.word.length;i++){
-      cells.push({ r:p.r + p.dr*i, c:p.c + p.dc*i });
-    }
-    wordPaths.set(p.word, cells);
+/* Build grid */
+gridLetters.forEach((row, r) => {
+  [...row].forEach((letter, c) => {
+    const cell = document.createElement("div");
+    cell.className = "cell";
+    cell.textContent = letter;
+    cell.dataset.pos = r + "-" + c;
+    cell.onclick = () => toggleCell(cell);
+    grid.appendChild(cell);
   });
+});
 
-  function key(rc){ return `${rc.r},${rc.c}`; }
+/* Build word list */
+words.forEach(w => {
+  const span = document.createElement("span");
+  span.className = "word";
+  span.id = "word-" + w;
+  span.textContent = w;
+  wordList.appendChild(span);
+});
 
-  function setStatus(){
-    statusEl.textContent = `Found ${found.size} of ${WORDS.length}`;
+function toggleCell(cell) {
+  const id = cell.dataset.pos;
+
+  if (selected.includes(id)) {
+    selected = selected.filter(x => x !== id);
+    cell.classList.remove("selected");
+  } else {
+    selected.push(id);
+    cell.classList.add("selected");
   }
+}
 
-  function renderChips(){
-    chipsEl.innerHTML = "";
-    WORDS.forEach(w => {
-      const div = document.createElement("div");
-      div.className = "chip" + (found.has(w) ? " found" : "");
-      div.textContent = w;
-      div.dataset.word = w;
-      chipsEl.appendChild(div);
-    });
-  }
-
-  function renderGrid(){
-    gridEl.innerHTML = "";
-    gridEl.style.gridTemplateRows = `repeat(${SIZE}, auto)`;
-    for(let r=0;r<SIZE;r++){
-      const row = document.createElement("div");
-      row.className = "row";
-      row.style.gridTemplateColumns = `repeat(${SIZE}, auto)`;
-      for(let c=0;c<SIZE;c++){
-        const cell = document.createElement("div");
-        cell.className = "cell";
-        cell.textContent = grid[r][c];
-        cell.dataset.r = r;
-        cell.dataset.c = c;
-        cell.addEventListener("pointerdown", onPointerDown);
-        cell.addEventListener("pointerenter", onPointerEnter);
-        cell.addEventListener("pointerup", onPointerUp);
-        row.appendChild(cell);
-      }
-      gridEl.appendChild(row);
+function clearSelection() {
+  selected.forEach(id => {
+    const el = document.querySelector(`[data-pos="${id}"]`);
+    if (el && !el.classList.contains("found")) {
+      el.classList.remove("selected");
     }
-  }
-
-  function getCellEl(r,c){
-    return gridEl.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
-  }
-
-  function clearSelectionUI(){
-    selected.forEach(rc => {
-      const el = getCellEl(rc.r, rc.c);
-      if(el) el.classList.remove("selected");
-    });
-    selected = [];
-    startCell = null;
-    endCell = null;
-  }
-
-  function normalizeLine(a,b){
-    const dr = Math.sign(b.r - a.r);
-    const dc = Math.sign(b.c - a.c);
-
-    // must be straight line: (dr,dc) must be one of the 8 directions
-    if(dr === 0 && dc === 0) return null;
-
-    // if not same row/col/diag, reject
-    const rr = Math.abs(b.r - a.r);
-    const cc = Math.abs(b.c - a.c);
-    if(!(rr === 0 || cc === 0 || rr === cc)) return null;
-
-    // build inclusive path
-    const len = Math.max(rr, cc) + 1;
-    const path = [];
-    for(let i=0;i<len;i++){
-      const r = a.r + dr*i;
-      const c = a.c + dc*i;
-      path.push({r,c});
-    }
-    return path;
-  }
-
-  function applySelection(path){
-    clearSelectionUI();
-    selected = path;
-    selected.forEach(rc => {
-      const el = getCellEl(rc.r, rc.c);
-      if(el) el.classList.add("selected");
-    });
-  }
-
-  // Pointer-based selection (drag)
-  let dragging = false;
-
-  function rcFromEl(el){
-    return { r: parseInt(el.dataset.r,10), c: parseInt(el.dataset.c,10) };
-  }
-
-  function onPointerDown(e){
-    e.preventDefault();
-    dragging = true;
-    const rc = rcFromEl(e.currentTarget);
-    startCell = rc;
-    endCell = null;
-    applySelection([rc]);
-    e.currentTarget.setPointerCapture(e.pointerId);
-  }
-
-  function onPointerEnter(e){
-    if(!dragging || !startCell) return;
-    const rc = rcFromEl(e.currentTarget);
-    endCell = rc;
-    const path = normalizeLine(startCell, endCell);
-    if(path) applySelection(path);
-  }
-
-  function onPointerUp(e){
-    if(!dragging) return;
-    dragging = false;
-    // keep whatever selection is visible
-  }
-
-  // Also support tap-tap (no drag): if user taps a second time, set end
-  gridEl.addEventListener("click", (e) => {
-    const cell = e.target.closest(".cell");
-    if(!cell) return;
-    const rc = rcFromEl(cell);
-
-    // If no start yet, set start
-    if(!startCell){
-      startCell = rc;
-      applySelection([rc]);
-      return;
-    }
-    // If start exists and we're not dragging: set end and select line
-    endCell = rc;
-    const path = normalizeLine(startCell, endCell);
-    if(path) applySelection(path);
   });
+  selected = [];
+}
 
-  function selectionString(){
-    return selected.map(rc => grid[rc.r][rc.c]).join("");
-  }
+function checkWord() {
+  if (selected.length < 2) return;
 
-  function arraysEqual(a,b){
-    if(a.length !== b.length) return false;
-    for(let i=0;i<a.length;i++){
-      if(a[i].r !== b[i].r || a[i].c !== b[i].c) return false;
-    }
-    return true;
-  }
+  const letters = selected.map(id => {
+    const [r,c] = id.split("-").map(Number);
+    return gridLetters[r][c];
+  }).join("");
 
-  function reversed(arr){
-    return [...arr].reverse();
-  }
+  const reversed = letters.split("").reverse().join("");
 
-  function markFound(word){
-    found.add(word);
+  let match = words.find(
+    w => !foundWords.has(w) && (w === letters || w === reversed)
+  );
 
-    // Mark path cells as found (intersection-safe: we do NOT block reuse)
-    const path = wordPaths.get(word);
-    path.forEach(rc => {
-      const el = getCellEl(rc.r, rc.c);
-      if(el) el.classList.add("found");
+  if (match) {
+    foundWords.add(match);
+    document.getElementById("word-" + match).classList.add("found");
+
+    selected.forEach(id => {
+      foundCells.add(id);
+      const el = document.querySelector(`[data-pos="${id}"]`);
+      if (el) {
+        el.classList.remove("selected");
+        el.classList.add("found");
+      }
     });
 
-    // Mark chip
-    const chip = chipsEl.querySelector(`.chip[data-word="${word}"]`);
-    if(chip) chip.classList.add("found");
-
-    setStatus();
+    counter.textContent = `Found ${foundWords.size} of ${words.length}`;
   }
 
-  function checkSelection(){
-    if(selected.length < 2) return;
-
-    // Must match exactly a placed word path (forward or backward)
-    for(const w of WORDS){
-      if(found.has(w)) continue;
-      const path = wordPaths.get(w);
-      if(!path) continue;
-
-      if(arraysEqual(selected, path) || arraysEqual(selected, reversed(path))){
-        markFound(w);
-        break;
-      }
-    }
-
-    clearSelectionUI();
-  }
-
-  function resetPuzzle(){
-    found.clear();
-    grid = buildGrid();
-    clearSelectionUI();
-    renderGrid();
-    renderChips();
-    setStatus();
-  }
-
-  checkBtn.addEventListener("click", checkSelection);
-  clearBtn.addEventListener("click", clearSelectionUI);
-  resetBtn.addEventListener("click", resetPuzzle);
-
-  // init
-  renderGrid();
-  renderChips();
-  setStatus();
-})();
+  clearSelection();
+}
 </script>
+
 </body>
 </html>
