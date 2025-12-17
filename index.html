@@ -3,180 +3,173 @@
 <head>
 <meta charset="UTF-8">
 <title>Holiday Word Search</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
 <style>
-body {
-  font-family: Arial, sans-serif;
-  max-width: 1100px;
-  margin: 20px auto;
-}
+  body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    max-width: 1100px;
+    margin: auto;
+  }
 
-h1 {
-  margin-bottom: 6px;
-}
+  h1 {
+    margin-bottom: 5px;
+  }
 
-.instructions {
-  font-size: 18px;
-  margin-bottom: 16px;
-}
+  .instructions {
+    margin-bottom: 15px;
+    font-size: 16px;
+  }
 
-.game-wrapper {
-  display: flex;
-  gap: 28px;
-  align-items: flex-start;
-}
+  .game {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+  }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(14, 44px);
-  gap: 6px;
-}
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(14, 42px);
+    gap: 6px;
+  }
 
-.cell {
-  width: 44px;
-  height: 44px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 20px;
-  font-weight: bold;
-  text-align: center;
-  line-height: 44px;
-  cursor: pointer;
-  user-select: none;
-}
+  .cell {
+    width: 42px;
+    height: 42px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 18px;
+    cursor: pointer;
+    user-select: none;
+  }
 
-.cell.selected {
-  background: #cfe8ff;
-}
+  .cell.selected {
+    background: #cfe9d6;
+  }
 
-.cell.found {
-  background: #b7e1c1;
-}
+  .cell.found {
+    background: #9ed6b3;
+  }
 
-.word-panel {
-  width: 300px;
-}
+  .sidebar {
+    min-width: 260px;
+  }
 
-.word-panel h3 {
-  margin-top: 0;
-}
+  .words {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 15px;
+  }
 
-.word {
-  display: inline-block;
-  padding: 6px 10px;
-  margin: 4px;
-  border: 1px solid #ccc;
-  border-radius: 20px;
-  font-weight: bold;
-}
+  .word {
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    font-weight: bold;
+  }
 
-.word.found {
-  background: #b7e1c1;
-}
+  .word.found {
+    background: #9ed6b3;
+  }
 
-.controls {
-  margin-top: 14px;
-}
+  .controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
 
-button {
-  padding: 10px 14px;
-  margin-right: 6px;
-  font-size: 16px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-}
+  button {
+    padding: 10px 16px;
+    font-size: 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
 
-.check { background: #9fd3c7; }
-.clear { background: #ddd; }
+  .check {
+    background: #9ed6b3;
+  }
 
-.counter {
-  margin-top: 14px;
-  font-weight: bold;
-  font-size: 18px;
-}
+  .clear {
+    background: #ddd;
+  }
+
+  .status {
+    font-weight: bold;
+    margin-top: 5px;
+  }
 </style>
 </head>
-
 <body>
 
 <h1>Holiday Word Search</h1>
 <div class="instructions">
-Click letters one at a time to spell a word in a straight line (up, down, left, right, or diagonal).  
-Then click <strong>Check</strong>.
+  Click letters one at a time to spell a word in a straight line (up, down, left, right, or diagonal).  
+  Then click <strong>Check</strong>.
 </div>
 
-<div class="game-wrapper">
+<div class="game">
+  <div class="grid" id="grid"></div>
 
-  <div id="grid" class="grid"></div>
-
-  <div class="word-panel">
+  <div class="sidebar">
     <h3>Find these words</h3>
-    <div id="wordList"></div>
+    <div class="words" id="wordList"></div>
 
     <div class="controls">
       <button class="check" onclick="checkWord()">Check</button>
       <button class="clear" onclick="clearSelection()">Clear</button>
     </div>
 
-    <div id="counter" class="counter">Found 0 of 12</div>
+    <div class="status" id="status">Found 0 of 12</div>
   </div>
-
 </div>
 
 <script>
-/* =====================
-   WORD SEARCH ENGINE
-   ===================== */
-
 const words = [
   "SANTA","REINDEER","ELVES","SNOW","NOEL","CAROL",
   "TINSEL","HOLLY","WREATH","GIFTS","SLEIGH","COCOA"
 ];
 
-// Pre-built, validated grid (14 x 14)
-// Every word exists in a straight line
 const gridLetters = [
-"S A N T A X X X C O C O A",
-"X X X X R E I N D E E R X",
-"E L V E S X X T I N S E L",
-"X X X X H O L L Y G I F T",
-"W R E A T H X X X X X S X",
-"S N O W X X X C A R O L X",
-"X X X X X X S L E I G H X",
-"C O C O A X X X X X X X X",
-"X X X X X X X X X X X X X",
-"X X X X X X X X X X X X X",
-"X X X X X X X X X X X X X",
-"X X X X X X X X X X X X X",
-"X X X X X X X X X X X X X",
-"X X X X X X X X X X X X X"
-].map(r => r.replace(/ /g,""));
+  "S A N T A C O C O A R E I N",
+  "R E I N D E E R N O E L V E",
+  "E L V E S C A R O L G I F T",
+  "T I N S E L H O L L Y W R E",
+  "A T H S N O W C O C O A A T",
+  "W R E A T H L E I G H S Z O",
+  "C G M Y Q L B O J T K A N S",
+  "N O U R H A M S E F I D E L",
+  "A E L K C O M F Y P R S T Y",
+  "D I E R S L M O W N A B R E",
+  "F U Z Z Y V I B E S H O L D",
+  "M I T T E N S C A R F S N O"
+].map(r => r.split(" "));
 
 const grid = document.getElementById("grid");
 const wordList = document.getElementById("wordList");
-const counter = document.getElementById("counter");
+const status = document.getElementById("status");
 
 let selected = [];
 let foundWords = new Set();
-let foundCells = new Set();
 
-/* Build grid */
 gridLetters.forEach((row, r) => {
-  [...row].forEach((letter, c) => {
-    const cell = document.createElement("div");
-    cell.className = "cell";
-    cell.textContent = letter;
-    cell.dataset.pos = r + "-" + c;
-    cell.onclick = () => toggleCell(cell);
-    grid.appendChild(cell);
+  row.forEach((letter, c) => {
+    const div = document.createElement("div");
+    div.className = "cell";
+    div.textContent = letter;
+    div.dataset.r = r;
+    div.dataset.c = c;
+    div.onclick = () => toggleCell(div);
+    grid.appendChild(div);
   });
 });
 
-/* Build word list */
 words.forEach(w => {
-  const span = document.createElement("span");
+  const span = document.createElement("div");
   span.className = "word";
   span.id = "word-" + w;
   span.textContent = w;
@@ -184,60 +177,51 @@ words.forEach(w => {
 });
 
 function toggleCell(cell) {
-  const id = cell.dataset.pos;
+  if (cell.classList.contains("found")) return;
 
-  if (selected.includes(id)) {
-    selected = selected.filter(x => x !== id);
+  if (cell.classList.contains("selected")) {
     cell.classList.remove("selected");
+    selected = selected.filter(c => c !== cell);
   } else {
-    selected.push(id);
     cell.classList.add("selected");
+    selected.push(cell);
   }
 }
 
 function clearSelection() {
-  selected.forEach(id => {
-    const el = document.querySelector(`[data-pos="${id}"]`);
-    if (el && !el.classList.contains("found")) {
-      el.classList.remove("selected");
-    }
-  });
+  selected.forEach(c => c.classList.remove("selected"));
   selected = [];
 }
 
 function checkWord() {
-  if (selected.length < 2) return;
+  if (selected.length === 0) return;
 
-  const letters = selected.map(id => {
-    const [r,c] = id.split("-").map(Number);
-    return gridLetters[r][c];
-  }).join("");
+  const word = selected.map(c => c.textContent).join("");
+  const reverse = word.split("").reverse().join("");
 
-  const reversed = letters.split("").reverse().join("");
-
-  let match = words.find(
-    w => !foundWords.has(w) && (w === letters || w === reversed)
-  );
-
-  if (match) {
-    foundWords.add(match);
-    document.getElementById("word-" + match).classList.add("found");
-
-    selected.forEach(id => {
-      foundCells.add(id);
-      const el = document.querySelector(`[data-pos="${id}"]`);
-      if (el) {
-        el.classList.remove("selected");
-        el.classList.add("found");
-      }
+  if (words.includes(word) || words.includes(reverse)) {
+    selected.forEach(c => {
+      c.classList.remove("selected");
+      c.classList.add("found");
     });
 
-    counter.textContent = `Found ${foundWords.size} of ${words.length}`;
+    const solved = words.includes(word) ? word : reverse;
+    document.getElementById("word-" + solved).classList.add("found");
+    foundWords.add(solved);
   }
 
-  clearSelection();
+  selected = [];
+  status.textContent = `Found ${foundWords.size} of ${words.length}`;
 }
 </script>
 
 </body>
 </html>
+
+ 
+
+
+
+   
+  
+ 
