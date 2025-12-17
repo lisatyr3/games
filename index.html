@@ -3,12 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <title>Holiday Word Search</title>
+
 <style>
   body {
     font-family: Arial, sans-serif;
-    padding: 20px;
-    max-width: 1100px;
-    margin: auto;
+    margin: 20px;
   }
 
   h1 {
@@ -20,7 +19,7 @@
     font-size: 16px;
   }
 
-  .game {
+  .game-wrapper {
     display: flex;
     gap: 30px;
     align-items: flex-start;
@@ -28,37 +27,38 @@
 
   .grid {
     display: grid;
-    grid-template-columns: repeat(14, 42px);
+    grid-template-columns: repeat(14, 44px);
     gap: 6px;
   }
 
   .cell {
-    width: 42px;
-    height: 42px;
+    width: 44px;
+    height: 44px;
     border: 1px solid #ccc;
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
     font-size: 18px;
     cursor: pointer;
     user-select: none;
+    background: #fff;
   }
 
   .cell.selected {
-    background: #cfe9d6;
+    background: #bfe3c5;
   }
 
   .cell.found {
-    background: #9ed6b3;
+    background: #bfe3c5;
+    cursor: default;
   }
 
-  .sidebar {
-    min-width: 260px;
+  .sidebar h3 {
+    margin-top: 0;
   }
 
-  .words {
+  .word-list {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
@@ -69,11 +69,12 @@
     padding: 6px 12px;
     border: 1px solid #ccc;
     border-radius: 20px;
-    font-weight: bold;
+    font-size: 14px;
   }
 
   .word.found {
-    background: #9ed6b3;
+    background: #bfe3c5;
+    border-color: #bfe3c5;
   }
 
   .controls {
@@ -84,26 +85,27 @@
 
   button {
     padding: 10px 16px;
-    font-size: 15px;
     border: none;
     border-radius: 8px;
+    font-size: 16px;
     cursor: pointer;
   }
 
-  .check {
-    background: #9ed6b3;
+  .check-btn {
+    background: #a9d7c8;
   }
 
-  .clear {
+  .clear-btn {
     background: #ddd;
   }
 
   .status {
     font-weight: bold;
-    margin-top: 5px;
+    margin-top: 10px;
   }
 </style>
 </head>
+
 <body>
 
 <h1>Holiday Word Search</h1>
@@ -112,107 +114,167 @@
   Then click <strong>Check</strong>.
 </div>
 
-<div class="game">
+<div class="game-wrapper">
   <div class="grid" id="grid"></div>
 
   <div class="sidebar">
     <h3>Find these words</h3>
-    <div class="words" id="wordList"></div>
+    <div class="word-list" id="wordList"></div>
 
     <div class="controls">
-      <button class="check" onclick="checkWord()">Check</button>
-      <button class="clear" onclick="clearSelection()">Clear</button>
+      <button class="check-btn" onclick="checkWord()">Check</button>
+      <button class="clear-btn" onclick="clearSelection()">Clear</button>
     </div>
 
-    <div class="status" id="status">Found 0 of 12</div>
+    <div class="status" id="status"></div>
   </div>
 </div>
 
 <script>
-const words = [
-  "SANTA","REINDEER","ELVES","SNOW","NOEL","CAROL",
-  "TINSEL","HOLLY","WREATH","GIFTS","SLEIGH","COCOA"
+/* =========================
+   EDIT ONLY THESE TWO BLOCKS
+   ========================= */
+
+const gridData = [
+  "N O S T N A S Q L R E H",
+  "O R E E D N I E R A C",
+  "E V L E S Y T O C O C",
+  "L T I N S E L O H L L",
+  "A H O L L Y W N O S X",
+  "R T A E R H T A E L G",
+  "C O C O A M I G F S I",
+  "Q N S L E I G H Z T F",
+  "Y R B O J T K A N S S",
+  "H A M S E F I D E W O",
+  "M F Y P R S T C A R L",
+  "D I E R S L M O W N A",
+  "Z Z Y V I B E S H O L",
+  "M I T T E N S C A R F"
 ];
 
-const gridLetters = [
-  "S A N T A C O C O A R E I N",
-  "R E I N D E E R N O E L V E",
-  "E L V E S C A R O L G I F T",
-  "T I N S E L H O L L Y W R E",
-  "A T H S N O W C O C O A A T",
-  "W R E A T H L E I G H S Z O",
-  "C G M Y Q L B O J T K A N S",
-  "N O U R H A M S E F I D E L",
-  "A E L K C O M F Y P R S T Y",
-  "D I E R S L M O W N A B R E",
-  "F U Z Z Y V I B E S H O L D",
-  "M I T T E N S C A R F S N O"
-].map(r => r.split(" "));
+const words = [
+  "SANTA",
+  "REINDEER",
+  "ELVES",
+  "SNOW",
+  "NOEL",
+  "CAROL",
+  "TINSEL",
+  "HOLLY",
+  "WREATH",
+  "GIFTS",
+  "SLEIGH",
+  "COCOA"
+];
 
-const grid = document.getElementById("grid");
-const wordList = document.getElementById("wordList");
-const status = document.getElementById("status");
+/* =========================
+   GAME LOGIC (DO NOT EDIT)
+   ========================= */
 
-let selected = [];
+const gridEl = document.getElementById("grid");
+const wordListEl = document.getElementById("wordList");
+const statusEl = document.getElementById("status");
+
+let selectedCells = [];
 let foundWords = new Set();
 
-gridLetters.forEach((row, r) => {
-  row.forEach((letter, c) => {
-    const div = document.createElement("div");
-    div.className = "cell";
-    div.textContent = letter;
-    div.dataset.r = r;
-    div.dataset.c = c;
-    div.onclick = () => toggleCell(div);
-    grid.appendChild(div);
+function buildGrid() {
+  gridData.forEach((row, r) => {
+    row.split(" ").forEach((letter, c) => {
+      const cell = document.createElement("div");
+      cell.className = "cell";
+      cell.textContent = letter;
+      cell.dataset.row = r;
+      cell.dataset.col = c;
+      cell.addEventListener("click", () => toggleCell(cell));
+      gridEl.appendChild(cell);
+    });
   });
-});
+}
 
-words.forEach(w => {
-  const span = document.createElement("div");
-  span.className = "word";
-  span.id = "word-" + w;
-  span.textContent = w;
-  wordList.appendChild(span);
-});
+function buildWordList() {
+  words.forEach(word => {
+    const w = document.createElement("div");
+    w.className = "word";
+    w.textContent = word;
+    w.id = "word-" + word;
+    wordListEl.appendChild(w);
+  });
+}
 
 function toggleCell(cell) {
   if (cell.classList.contains("found")) return;
 
   if (cell.classList.contains("selected")) {
     cell.classList.remove("selected");
-    selected = selected.filter(c => c !== cell);
+    selectedCells = selectedCells.filter(c => c !== cell);
   } else {
     cell.classList.add("selected");
-    selected.push(cell);
+    selectedCells.push(cell);
   }
 }
 
 function clearSelection() {
-  selected.forEach(c => c.classList.remove("selected"));
-  selected = [];
+  selectedCells.forEach(c => c.classList.remove("selected"));
+  selectedCells = [];
 }
 
 function checkWord() {
-  if (selected.length === 0) return;
+  if (selectedCells.length < 2) return;
 
-  const word = selected.map(c => c.textContent).join("");
-  const reverse = word.split("").reverse().join("");
+  const letters = selectedCells.map(c => c.textContent).join("");
+  const reversed = letters.split("").reverse().join("");
 
-  if (words.includes(word) || words.includes(reverse)) {
-    selected.forEach(c => {
-      c.classList.remove("selected");
-      c.classList.add("found");
-    });
+  let match = words.find(w =>
+    !foundWords.has(w) && (w === letters || w === reversed)
+  );
 
-    const solved = words.includes(word) ? word : reverse;
-    document.getElementById("word-" + solved).classList.add("found");
-    foundWords.add(solved);
+  if (!match) {
+    clearSelection();
+    return;
   }
 
-  selected = [];
-  status.textContent = `Found ${foundWords.size} of ${words.length}`;
+  if (!isStraightLine(selectedCells)) {
+    clearSelection();
+    return;
+  }
+
+  selectedCells.forEach(c => {
+    c.classList.remove("selected");
+    c.classList.add("found");
+  });
+
+  foundWords.add(match);
+  document.getElementById("word-" + match).classList.add("found");
+  updateStatus();
+  selectedCells = [];
 }
+
+function isStraightLine(cells) {
+  const coords = cells.map(c => ({
+    r: parseInt(c.dataset.row),
+    c: parseInt(c.dataset.col)
+  }));
+
+  const dr = coords[1].r - coords[0].r;
+  const dc = coords[1].c - coords[0].c;
+
+  for (let i = 2; i < coords.length; i++) {
+    if (
+      coords[i].r - coords[i - 1].r !== dr ||
+      coords[i].c - coords[i - 1].c !== dc
+    ) return false;
+  }
+  return true;
+}
+
+function updateStatus() {
+  statusEl.textContent = `Found ${foundWords.size} of ${words.length}`;
+}
+
+buildGrid();
+buildWordList();
+updateStatus();
 </script>
 
 </body>
@@ -222,6 +284,10 @@ function checkWord() {
 
 
 
-   
+
+
   
- 
+  
+  
+
+
