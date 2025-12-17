@@ -3,62 +3,62 @@
 <head>
 <meta charset="UTF-8">
 <title>Holiday Word Search</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
 body {
   font-family: Arial, sans-serif;
-  background: #ffffff;
-  padding: 20px;
+  max-width: 1100px;
+  margin: 20px auto;
 }
 
 h1 {
-  text-align: center;
+  margin-bottom: 5px;
 }
 
 .instructions {
-  text-align: center;
   margin-bottom: 15px;
+  font-size: 18px;
 }
 
-.container {
+.game-wrapper {
   display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  justify-content: center;
+  gap: 30px;
+  align-items: flex-start;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(14, 40px);
+  grid-template-columns: repeat(14, 42px);
   gap: 6px;
 }
 
 .cell {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   border: 1px solid #ccc;
-  text-align: center;
-  line-height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   font-weight: bold;
+  font-size: 18px;
   cursor: pointer;
   user-select: none;
-  border-radius: 6px;
+  border-radius: 8px;
 }
 
 .cell.selected {
-  background: #b7e4da;
+  background: #cfe8ff;
 }
 
 .cell.found {
-  background: #a3d5ff;
+  background: #b7e1c1;
 }
 
-.words {
-  max-width: 260px;
+.word-panel {
+  width: 280px;
 }
 
-.words h3 {
+.word-panel h3 {
   margin-top: 0;
 }
 
@@ -67,62 +67,64 @@ h1 {
   padding: 6px 10px;
   margin: 4px;
   border: 1px solid #ccc;
-  border-radius: 14px;
+  border-radius: 20px;
+  font-weight: bold;
 }
 
 .word.found {
-  background: #a3d5ff;
+  background: #b7e1c1;
 }
 
 .controls {
-  text-align: center;
-  margin-top: 20px;
+  margin-top: 15px;
 }
 
 button {
-  padding: 10px 16px;
-  margin: 5px;
-  font-size: 16px;
-  border-radius: 6px;
+  padding: 10px 14px;
+  margin-right: 6px;
+  border-radius: 8px;
   border: none;
   cursor: pointer;
+  font-size: 16px;
 }
 
-.check { background: #9ad1c6; }
+.check { background: #9fd3c7; }
+.hint { background: #ffeaa7; }
 .clear { background: #ddd; }
-.hint { background: #ffe8a1; }
 
-.status {
-  text-align: center;
+.counter {
   margin-top: 15px;
   font-weight: bold;
+  font-size: 18px;
 }
 </style>
 </head>
 
 <body>
 
-<h1>🎄 Holiday Word Search</h1>
-<p class="instructions">
-Tap letters in a straight line (up, down, left, right, or diagonal), then click <b>Check</b>.
-</p>
+<h1>Holiday Word Search</h1>
+<div class="instructions">
+Tap letters in a straight line (up, down, left, right, or diagonal), then click <strong>Check</strong>.
+</div>
 
-<div class="container">
-  <div class="grid" id="grid"></div>
+<div class="game-wrapper">
 
-  <div class="words">
+  <div id="grid" class="grid"></div>
+
+  <div class="word-panel">
     <h3>Find these words</h3>
     <div id="wordList"></div>
+
+    <div class="controls">
+      <button class="check" onclick="checkSelection()">Check</button>
+      <button class="hint" onclick="giveHint()">Hint</button>
+      <button class="clear" onclick="clearSelection()">Clear</button>
+    </div>
+
+    <div class="counter" id="counter">Found 0 of 12</div>
   </div>
-</div>
 
-<div class="controls">
-  <button class="check" onclick="checkWord()">Check</button>
-  <button class="hint" onclick="giveHint()">Hint</button>
-  <button class="clear" onclick="clearSelection()">Clear</button>
 </div>
-
-<div class="status" id="status">Found 0 of 12</div>
 
 <script>
 const words = [
@@ -137,7 +139,7 @@ const gridLetters = [
 "IKSSEFBTLDXPAP",
 "BEHEAIYOREBUZO",
 "STKVTGGDETSOEV",
-"CGRLHNIHIFINIR",
+"CGRLHNIIHIFNIR",
 "AGSEHOILNSZMIQ",
 "LKDDJEJODSZUYT",
 "MKBPILCRENPSNS",
@@ -149,18 +151,16 @@ const gridLetters = [
 
 const grid = document.getElementById("grid");
 const wordList = document.getElementById("wordList");
-const status = document.getElementById("status");
-
 let selected = [];
-let foundWords = [];
+let foundWords = new Set();
+let foundCells = new Set();
 
 gridLetters.forEach((row, r) => {
   [...row].forEach((letter, c) => {
     const cell = document.createElement("div");
     cell.className = "cell";
     cell.textContent = letter;
-    cell.dataset.row = r;
-    cell.dataset.col = c;
+    cell.dataset.index = r + "-" + c;
     cell.onclick = () => toggleCell(cell);
     grid.appendChild(cell);
   });
@@ -169,49 +169,72 @@ gridLetters.forEach((row, r) => {
 words.forEach(w => {
   const span = document.createElement("span");
   span.className = "word";
-  span.textContent = w;
   span.id = "word-" + w;
+  span.textContent = w;
   wordList.appendChild(span);
 });
 
 function toggleCell(cell) {
-  if (cell.classList.contains("found")) return;
-  cell.classList.toggle("selected");
-  if (cell.classList.contains("selected")) selected.push(cell);
-  else selected = selected.filter(c => c !== cell);
-}
-
-function clearSelection() {
-  selected.forEach(c => c.classList.remove("selected"));
-  selected = [];
-}
-
-function checkWord() {
-  if (selected.length < 2) return;
-  const word = selected.map(c => c.textContent).join("");
-  const reversed = word.split("").reverse().join("");
-
-  if (words.includes(word) || words.includes(reversed)) {
-    selected.forEach(c => {
-      c.classList.remove("selected");
-      c.classList.add("found");
-    });
-    const match = words.includes(word) ? word : reversed;
-    document.getElementById("word-" + match).classList.add("found");
-    foundWords.push(match);
-    updateStatus();
+  const id = cell.dataset.index;
+  if (selected.includes(id)) {
+    selected = selected.filter(i => i !== id);
+    cell.classList.remove("selected");
+  } else {
+    selected.push(id);
+    cell.classList.add("selected");
   }
+}
+
+function checkSelection() {
+  if (selected.length === 0) return;
+
+  const letters = selected.map(id => {
+    const [r,c] = id.split("-").map(Number);
+    return gridLetters[r][c];
+  }).join("");
+
+  const reversed = letters.split("").reverse().join("");
+
+  words.forEach(word => {
+    if (!foundWords.has(word) && (letters === word || reversed === word)) {
+      foundWords.add(word);
+      document.getElementById("word-" + word).classList.add("found");
+      selected.forEach(id => foundCells.add(id));
+    }
+  });
+
+  updateGrid();
   clearSelection();
 }
 
-function giveHint() {
-  const remaining = words.filter(w => !foundWords.includes(w));
-  if (remaining.length === 0) return;
-  alert("Look for: " + remaining[0]);
+function updateGrid() {
+  document.querySelectorAll(".cell").forEach(cell => {
+    if (foundCells.has(cell.dataset.index)) {
+      cell.classList.add("found");
+    }
+  });
+  document.getElementById("counter").textContent =
+    `Found ${foundWords.size} of ${words.length}`;
 }
 
-function updateStatus() {
-  status.textContent = `Found ${foundWords.length} of ${words.length}`;
+function clearSelection() {
+  selected = [];
+  document.querySelectorAll(".cell.selected").forEach(c => c.classList.remove("selected"));
+}
+
+function giveHint() {
+  for (let word of words) {
+    if (!foundWords.has(word)) {
+      const first = word[0];
+      document.querySelectorAll(".cell").forEach(c => {
+        if (c.textContent === first && !c.classList.contains("found")) {
+          c.classList.add("selected");
+          setTimeout(() => c.classList.remove("selected"), 800);
+        }
+      });
+      break;
+    }
+  }
 }
 </script>
 
