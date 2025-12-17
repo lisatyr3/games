@@ -89,7 +89,6 @@ button {
 }
 
 .check { background: #9fd3c7; }
-.hint { background: #ffeaa7; }
 .clear { background: #ddd; }
 
 .counter {
@@ -117,7 +116,6 @@ Tap letters in a straight line (up, down, left, right, or diagonal), then click 
 
     <div class="controls">
       <button class="check" onclick="checkSelection()">Check</button>
-      <button class="hint" onclick="giveHint()">Hint</button>
       <button class="clear" onclick="clearSelection()">Clear</button>
     </div>
 
@@ -133,21 +131,19 @@ const words = [
 ];
 
 const gridLetters = [
-"UXDPYLLOHPSNOW",
-"NRSWWSJCOCOAKD",
-"HEALRTWOXBEBWF",
-"IKSSEFBTLDXPAP",
-"BEHEAIYOREBUZO",
-"STKVTGGDETSOEV",
-"CGRLHNIIHIFNIR",
-"AGSEHOILNSZMIQ",
-"LKDDJEJODSZUYT",
-"MKBPILCRENPSNS",
-"ZICKUODAEPWAQV",
-"EGZDSVRCRTFNAD",
-"DBJJKWEKOGLTXO",
-"DTRPHFNXKITAPZ"
-];
+"S A N T A C O C O A X",
+"R E I N D E E R N O",
+"E L V E S T I N S E",
+"H O L L Y G I F T S",
+"W R E A T H N O E L",
+"S L E I G H C A R O",
+"S N O W J O Y L E T",
+"T I N S E L F U N S",
+"M E R R Y X M A S S",
+"C H R I S T M A S Y",
+"H O T C O C O A Z Z",
+"F E S T I V E D A Y"
+].map(r => r.replace(/ /g,""));
 
 const grid = document.getElementById("grid");
 const wordList = document.getElementById("wordList");
@@ -220,21 +216,6 @@ function updateGrid() {
 function clearSelection() {
   selected = [];
   document.querySelectorAll(".cell.selected").forEach(c => c.classList.remove("selected"));
-}
-
-function giveHint() {
-  for (let word of words) {
-    if (!foundWords.has(word)) {
-      const first = word[0];
-      document.querySelectorAll(".cell").forEach(c => {
-        if (c.textContent === first && !c.classList.contains("found")) {
-          c.classList.add("selected");
-          setTimeout(() => c.classList.remove("selected"), 800);
-        }
-      });
-      break;
-    }
-  }
 }
 </script>
 
