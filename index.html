@@ -3,55 +3,49 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Holiday Word Search</title>
+  <title>Winter Wonderland Word Search</title>
   <style>
     :root{
-      --tile: 46px;
-      --gap: 10px;
+      --tile:46px;
+      --gap:10px;
       --border:#d9d9d9;
-      --text:#111;
-      --muted:#666;
       --selected:#cfe8ff;
       --found:#bfe6c6;
-      --chip:#f6f6f6;
-      --chip-border:#dcdcdc;
-      --btn:#e9e9e9;
-      --btnText:#111;
       --btnPrimary:#bfe6c6;
+      --btnSecondary:#e7e7e7;
+      --max:1100px;
     }
     body{
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color:var(--text);
       margin:0;
-      padding:28px 18px;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       background:#fff;
+      color:#111;
     }
-    h1{ margin:0 0 6px; font-size:44px; letter-spacing:-0.5px; }
-    .sub{ margin:0 0 18px; color:var(--muted); font-size:18px; line-height:1.35; }
-
     .wrap{
-      max-width: 1100px;
-      margin: 0 auto;
+      max-width:var(--max);
+      margin:0 auto;
+      padding:28px 18px 40px;
+    }
+    h1{ margin:0 0 6px; font-size:44px; letter-spacing:-0.02em; }
+    .sub{ margin:0 0 18px; color:#444; font-size:18px; line-height:1.35; }
+
+    .layout{
       display:flex;
       gap:26px;
       align-items:flex-start;
     }
-
-    .board{
-      flex: 1 1 auto;
-      min-width: 320px;
+    @media (max-width: 980px){
+      .layout{ flex-direction:column; }
     }
 
     .grid{
       display:grid;
-      grid-template-columns: repeat(14, var(--tile));
-      gap: var(--gap);
-      align-items:center;
-      justify-content:start;
+      gap:var(--gap);
       user-select:none;
+      -webkit-user-select:none;
+      touch-action:manipulation;
     }
-
-    .cell{
+    .tile{
       width:var(--tile);
       height:var(--tile);
       border:1px solid var(--border);
@@ -59,31 +53,21 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      font-weight:700;
+      font-weight:800;
       font-size:20px;
-      background:#fff;
       cursor:pointer;
-      transition: transform 0.03s ease, background 0.12s ease;
+      background:#fff;
     }
-    .cell:active{ transform: scale(0.98); }
-
-    /* Found letters stay green, even if re-used later */
-    .cell.found{ background: var(--found); }
-
-    /* Selected letters are blue; if a found letter is selected, it becomes blue while selected */
-    .cell.selected{ background: var(--selected) !important; }
+    .tile.sel{ background:var(--selected); }
+    .tile.found{ background:var(--found); }
+    /* if a found tile is currently selected, show selected color */
+    .tile.found.sel{ background:var(--selected); }
 
     .side{
-      width: 320px;
-      flex: 0 0 320px;
+      width:320px;
+      flex:0 0 320px;
     }
-
-    .side h2{
-      margin:6px 0 12px;
-      font-size:30px;
-      letter-spacing:-0.3px;
-    }
-
+    .side h2{ margin:6px 0 12px; font-size:28px; }
     .chips{
       display:flex;
       flex-wrap:wrap;
@@ -91,283 +75,377 @@
       margin-bottom:14px;
     }
     .chip{
-      background: var(--chip);
-      border:1px solid var(--chip-border);
-      border-radius:999px;
       padding:10px 14px;
+      border-radius:999px;
+      border:1px solid #d0d0d0;
       font-weight:800;
-      font-size:16px;
-      line-height:1;
-      color:#111;
+      font-size:14px;
+      background:#fff;
     }
     .chip.found{
-      background: var(--found);
-      border-color: #9fd2a7;
+      background:var(--found);
+      border-color:transparent;
     }
 
     .controls{
       display:flex;
       gap:12px;
-      align-items:center;
-      margin: 10px 0 14px;
+      margin:12px 0 12px;
       flex-wrap:wrap;
     }
     button{
       border:0;
       border-radius:10px;
       padding:12px 16px;
+      font-weight:800;
       font-size:16px;
-      font-weight:700;
-      background: var(--btn);
-      color: var(--btnText);
       cursor:pointer;
     }
-    button.primary{ background: var(--btnPrimary); }
-    button:active{ transform: translateY(1px); }
+    .primary{ background:var(--btnPrimary); }
+    .secondary{ background:var(--btnSecondary); }
 
     .status{
+      font-size:18px;
+      font-weight:900;
       margin-top:6px;
-      font-size:20px;
-      font-weight:800;
     }
 
-    .note{
-      margin-top:10px;
-      color:var(--muted);
-      font-size:14px;
-      line-height:1.35;
-    }
-
-    /* Responsive: stack sidebar under grid on small screens */
-    @media (max-width: 980px){
-      .wrap{ flex-direction:column; }
-      .side{ width:100%; flex: 1 1 auto; }
-      .grid{ justify-content:center; }
-    }
-
-    /* Tighten tiles a bit on very small screens */
     @media (max-width: 520px){
-      :root{ --tile: 38px; --gap: 8px; }
+      :root{ --tile:40px; --gap:8px; }
       h1{ font-size:36px; }
-      .side h2{ font-size:26px; }
+      .side{ width:100%; flex:1 1 auto; }
     }
   </style>
 </head>
 
 <body>
   <div class="wrap">
-    <div class="board">
-      <h1>Holiday Word Search</h1>
-      <p class="sub">
-        Click letters one at a time to spell a word in a straight line
-        (up, down, left, right, or diagonal). Then click <b>Check</b>.
-      </p>
+    <h1 id="title">Winter Wonderland</h1>
+    <p class="sub">
+      Click letters one at a time in a straight line (up, down, left, right, or diagonal).
+      Then click <b>Check</b>.
+    </p>
 
-      <div id="grid" class="grid" aria-label="Word search grid"></div>
-    </div>
-
-    <aside class="side">
-      <h2>Find these words</h2>
-
-      <div id="chips" class="chips"></div>
-
-      <div class="controls">
-        <button id="checkBtn" class="primary" type="button">Check</button>
-        <button id="clearBtn" type="button">Clear</button>
+    <div class="layout">
+      <div>
+        <div id="grid" class="grid" aria-label="Word search grid"></div>
       </div>
 
-      <div id="status" class="status">Found 0 of 12</div>
-      <div class="note">Tip: You can re-use letters that are part of an already-found word.</div>
-    </aside>
+      <aside class="side">
+        <h2>Find these words</h2>
+        <div id="chips" class="chips"></div>
+
+        <div class="controls">
+          <button id="checkBtn" class="primary" type="button">Check</button>
+          <button id="clearBtn" class="secondary" type="button">Clear</button>
+        </div>
+
+        <div id="status" class="status">Found 0 of 0</div>
+      </aside>
+    </div>
   </div>
 
 <script>
-  // 14 columns x 11 rows (each row must be EXACTLY 14 letters)
-  const gridData = [
-    "HWLOWPKSASYXCX",
-    "GLOUVRWLCAZRMG",
-    "INOGPGEIKNJKRS",
-    "EHERSPIAZTKVYB",
-    "LOBDAUZFTAOADF",
-    "SLEONCOOTHANGW",
-    "ELUJCFICUSLICL",
-    "VYUOFBMUSEVLEJ",
-    "XWCYHNUCWONSWD",
-    "AOGREINDEERPCE",
-    "ASHTINSELQVOAA"
+/* =========================
+   SETTINGS (safe to change)
+   ========================= */
+const COLS = 14;
+const ROWS = 11;
+
+// Tomorrow’s theme words (all will be placed)
+const WORDS = [
+  "AURORA",
+  "BLIZZARD",
+  "COCOA",
+  "FROST",
+  "GLACIER",
+  "ICICLE",
+  "IGLOO",
+  "MITTENS",
+  "PENGUIN",
+  "SCARF",
+  "SLEIGH",
+  "SNOWMAN"
+];
+
+// Change this daily if you want a new puzzle without touching anything else:
+const SEED_STRING = "2025-12-18";
+
+/* =========================
+   Seeded RNG (stable puzzle)
+   ========================= */
+function xmur3(str){
+  let h = 1779033703 ^ str.length;
+  for (let i=0;i<str.length;i++){
+    h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
+    h = (h << 13) | (h >>> 19);
+  }
+  return function(){
+    h = Math.imul(h ^ (h >>> 16), 2246822507);
+    h = Math.imul(h ^ (h >>> 13), 3266489909);
+    h ^= (h >>> 16);
+    return h >>> 0;
+  };
+}
+function mulberry32(a){
+  return function(){
+    let t = a += 0x6D2B79F5;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const seedFn = xmur3(SEED_STRING);
+let rand = mulberry32(seedFn());
+function rInt(n){ return Math.floor(rand() * n); }
+function pick(arr){ return arr[rInt(arr.length)]; }
+
+/* =========================
+   Grid generator (verified)
+   ========================= */
+
+// Avoid obvious left→right words by NOT allowing (dx=+1, dy=0)
+const DIRS = [
+  {dx:-1, dy:0},  // W (backwards horizontal ok)
+  {dx:0,  dy:1},  // S
+  {dx:0,  dy:-1}, // N
+  {dx:1,  dy:1},  // SE
+  {dx:-1, dy:-1}, // NW
+  {dx:1,  dy:-1}, // NE
+  {dx:-1, dy:1}   // SW
+];
+
+function inBounds(x,y){ return x>=0 && x<COLS && y>=0 && y<ROWS; }
+
+function canPlace(grid, word, x0, y0, dir){
+  for (let i=0;i<word.length;i++){
+    const x = x0 + dir.dx*i;
+    const y = y0 + dir.dy*i;
+    if (!inBounds(x,y)) return false;
+    const cur = grid[y][x];
+    if (cur !== "" && cur !== word[i]) return false;
+  }
+  return true;
+}
+
+function placeWord(grid, word){
+  // Try many attempts; prefers diagonals by repeating them in the pool
+  const weightedDirs = [
+    DIRS[3],DIRS[4],DIRS[5],DIRS[6], // diagonals (more often)
+    DIRS[0],DIRS[1],DIRS[2]          // straight
   ];
 
-  const words = [
-    "SANTA","REINDEER","ELVES","SNOW","NOEL","CAROL",
-    "TINSEL","HOLLY","WREATH","GIFTS","SLEIGH","COCOA"
+  for (let tries=0; tries<1200; tries++){
+    const dir = pick(weightedDirs);
+    const x0 = rInt(COLS);
+    const y0 = rInt(ROWS);
+    if (!canPlace(grid, word, x0, y0, dir)) continue;
+
+    for (let i=0;i<word.length;i++){
+      const x = x0 + dir.dx*i;
+      const y = y0 + dir.dy*i;
+      grid[y][x] = word[i];
+    }
+    return true;
+  }
+  return false;
+}
+
+function findWord(grid, word){
+  // Verify word exists in any of the allowed 8 directions including dx=+1,dy=0 for checking
+  const checkDirs = [
+    {dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1},
+    {dx:1,dy:1},{dx:-1,dy:-1},{dx:1,dy:-1},{dx:-1,dy:1}
   ];
+  for (let y=0;y<ROWS;y++){
+    for (let x=0;x<COLS;x++){
+      for (const d of checkDirs){
+        let ok = true;
+        for (let i=0;i<word.length;i++){
+          const xx = x + d.dx*i;
+          const yy = y + d.dy*i;
+          if (!inBounds(xx,yy) || grid[yy][xx] !== word[i]) { ok=false; break; }
+        }
+        if (ok) return true;
+      }
+    }
+  }
+  return false;
+}
 
-  const ROWS = gridData.length;
-  const COLS = gridData[0].length;
+function generateVerifiedGrid(words){
+  // Reset RNG each generation attempt to keep deterministic retry behavior per seed
+  rand = mulberry32(seedFn());
 
-  const gridEl = document.getElementById("grid");
-  const chipsEl = document.getElementById("chips");
-  const statusEl = document.getElementById("status");
-  const checkBtn = document.getElementById("checkBtn");
-  const clearBtn = document.getElementById("clearBtn");
+  for (let attempt=0; attempt<200; attempt++){
+    const grid = Array.from({length: ROWS}, () => Array.from({length: COLS}, () => ""));
+    const sorted = [...words].sort((a,b)=>b.length-a.length);
 
-  // State
-  const foundWords = new Set();
-  const foundCells = new Set();   // "r,c" for green cells
-  let selected = [];              // array of {r,c}
-  let direction = null;           // {dr,dc} once established
+    let placedAll = true;
+    for (const w of sorted){
+      if (!placeWord(grid, w)){ placedAll = false; break; }
+    }
+    if (!placedAll) continue;
 
-  function key(r,c){ return r + "," + c; }
-  function inBounds(r,c){ return r>=0 && r<ROWS && c>=0 && c<COLS; }
-  function letterAt(r,c){ return gridData[r].charAt(c); }
-
-  function renderGrid(){
-    gridEl.innerHTML = "";
-    gridEl.style.gridTemplateColumns = `repeat(${COLS}, var(--tile))`;
-
-    for(let r=0;r<ROWS;r++){
-      for(let c=0;c<COLS;c++){
-        const btn = document.createElement("div");
-        btn.className = "cell";
-        btn.textContent = letterAt(r,c);
-        btn.dataset.r = r;
-        btn.dataset.c = c;
-
-        const k = key(r,c);
-        if(foundCells.has(k)) btn.classList.add("found");
-
-        btn.addEventListener("click", () => onCellClick(r,c));
-        gridEl.appendChild(btn);
+    // Fill with high-frequency letters to avoid “wordy” filler
+    const filler = "EAIONRSTLUAENRSTL"; // boring, camouflaging
+    for (let y=0;y<ROWS;y++){
+      for (let x=0;x<COLS;x++){
+        if (grid[y][x] === ""){
+          grid[y][x] = filler[rInt(filler.length)];
+        }
       }
     }
 
-    syncSelectedClasses();
-  }
-
-  function renderChips(){
-    chipsEl.innerHTML = "";
-    words.forEach(w=>{
-      const chip = document.createElement("div");
-      chip.className = "chip" + (foundWords.has(w) ? " found" : "");
-      chip.textContent = w;
-      chipsEl.appendChild(chip);
-    });
-  }
-
-  function syncSelectedClasses(){
-    const selectedSet = new Set(selected.map(p=>key(p.r,p.c)));
-    const cells = gridEl.querySelectorAll(".cell");
-    cells.forEach(cell=>{
-      const r = Number(cell.dataset.r);
-      const c = Number(cell.dataset.c);
-      const k = key(r,c);
-      cell.classList.toggle("selected", selectedSet.has(k));
-      cell.classList.toggle("found", foundCells.has(k));
-    });
-  }
-
-  // Allow deselecting ONLY the last clicked tile (simple + senior-friendly)
-  function popIfLast(r,c){
-    if(selected.length === 0) return false;
-    const last = selected[selected.length-1];
-    if(last.r === r && last.c === c){
-      selected.pop();
-      if(selected.length < 2) direction = null;
-      return true;
+    // Verify every word is truly present
+    let ok = true;
+    for (const w of words){
+      if (!findWord(grid, w)){ ok = false; break; }
     }
-    return false;
+    if (ok) return grid;
   }
 
-  function adjacentStep(a,b){
-    const dr = b.r - a.r;
-    const dc = b.c - a.c;
-    if(dr === 0 && dc === 0) return null;
-    if(Math.abs(dr) > 1 || Math.abs(dc) > 1) return null;
-    return { dr: Math.sign(dr), dc: Math.sign(dc) };
-  }
+  // Should not happen, but fail safely
+  throw new Error("Could not generate a valid puzzle. Try a different seed.");
+}
 
-  function onCellClick(r,c){
-    // toggle off last
-    if(popIfLast(r,c)){
-      syncSelectedClasses();
-      return;
+/* =========================
+   UI + Interaction (same as today)
+   ========================= */
+const gridEl = document.getElementById("grid");
+const chipsEl = document.getElementById("chips");
+const statusEl = document.getElementById("status");
+
+const WORDSET = WORDS.map(w => w.toUpperCase().replace(/[^A-Z]/g,""));
+const foundWords = new Set();
+const foundCells = new Set(); // "x,y"
+
+let selected = [];    // [{x,y,el}]
+let lockedDir = null; // {dx,dy}
+
+const gridData = generateVerifiedGrid(WORDSET);
+
+function k(x,y){ return x + "," + y; }
+
+function renderChips(){
+  chipsEl.innerHTML = "";
+  for (const w of WORDSET){
+    const d = document.createElement("div");
+    d.className = "chip" + (foundWords.has(w) ? " found" : "");
+    d.textContent = w;
+    chipsEl.appendChild(d);
+  }
+}
+
+function renderStatus(){
+  statusEl.textContent = `Found ${foundWords.size} of ${WORDSET.length}`;
+}
+
+function buildGrid(){
+  gridEl.innerHTML = "";
+  gridEl.style.gridTemplateColumns = `repeat(${COLS}, var(--tile))`;
+
+  for (let y=0;y<ROWS;y++){
+    for (let x=0;x<COLS;x++){
+      const t = document.createElement("div");
+      t.className = "tile";
+      t.textContent = gridData[y][x];
+      t.dataset.x = x;
+      t.dataset.y = y;
+      t.addEventListener("click", () => onTap(x,y,t));
+      gridEl.appendChild(t);
     }
+  }
+}
 
-    // prevent selecting the same cell twice (unless it's last to deselect)
-    if(selected.some(p=>p.r===r && p.c===c)) return;
+function clearSelection(){
+  selected.forEach(s => s.el.classList.remove("sel"));
+  selected = [];
+  lockedDir = null;
+}
 
-    if(selected.length === 0){
-      selected.push({r,c});
-      direction = null;
-      syncSelectedClasses();
-      return;
-    }
+function step(a,b){
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  if (dx===0 && dy===0) return null;
+  if (Math.abs(dx)>1 || Math.abs(dy)>1) return null;
+  return {dx:Math.sign(dx), dy:Math.sign(dy)};
+}
 
-    if(selected.length === 1){
-      const step = adjacentStep(selected[0], {r,c});
-      if(!step) return; // must be adjacent
-      direction = step;
-      selected.push({r,c});
-      syncSelectedClasses();
-      return;
-    }
-
-    // length >= 2: must keep same direction and be next to the last cell
-    const last = selected[selected.length-1];
-    const step = adjacentStep(last, {r,c});
-    if(!step) return;
-
-    if(step.dr !== direction.dr || step.dc !== direction.dc) return;
-
-    selected.push({r,c});
-    syncSelectedClasses();
+function onTap(x,y,el){
+  // tap last selected again to undo
+  if (selected.length && selected[selected.length-1].x===x && selected[selected.length-1].y===y){
+    selected[selected.length-1].el.classList.remove("sel");
+    selected.pop();
+    if (selected.length < 2) lockedDir = null;
+    return;
   }
 
-  function getSelectedString(){
-    return selected.map(p=>letterAt(p.r,p.c)).join("");
+  // prevent re-selecting same tile in the middle
+  if (selected.some(s => s.x===x && s.y===y)) return;
+
+  if (selected.length === 0){
+    selected.push({x,y,el});
+    el.classList.add("sel");
+    return;
   }
 
-  function checkSelection(){
-    if(selected.length < 2) return;
-
-    const s1 = getSelectedString();
-    const s2 = s1.split("").reverse().join("");
-
-    // match any not-yet-found word
-    const match = words.find(w => !foundWords.has(w) && (w === s1 || w === s2));
-    if(!match) return;
-
-    foundWords.add(match);
-
-    // mark cells as found (green) BUT they remain clickable for intersecting words
-    selected.forEach(p => foundCells.add(key(p.r,p.c)));
-
-    // clear selection
-    selected = [];
-    direction = null;
-
-    renderChips();
-    syncSelectedClasses();
-    updateStatus();
+  if (selected.length === 1){
+    const s = step(selected[0], {x,y});
+    if (!s) return;
+    lockedDir = s;
+    selected.push({x,y,el});
+    el.classList.add("sel");
+    return;
   }
 
-  function clearSelection(){
-    selected = [];
-    direction = null;
-    syncSelectedClasses();
-  }
+  // must continue same direction and be contiguous
+  const last = selected[selected.length-1];
+  const s = step(last, {x,y});
+  if (!s) return;
+  if (s.dx !== lockedDir.dx || s.dy !== lockedDir.dy) return;
 
-  function updateStatus(){
-    statusEl.textContent = `Found ${foundWords.size} of ${words.length}`;
-  }
+  selected.push({x,y,el});
+  el.classList.add("sel");
+}
 
-  checkBtn.addEventListener("click", checkSelection);
-  clearBtn.addEventListener("click", clearSelection);
+function selectedString(){
+  return selected.map(s => gridData[s.y][s.x]).join("");
+}
 
-  // Init
-  renderGrid();
+function markFound(){
+  selected.forEach(s => {
+    foundCells.add(k(s.x,s.y));
+    s.el.classList.add("found");
+    s.el.classList.remove("sel");
+  });
+  selected = [];
+  lockedDir = null;
+}
+
+document.getElementById("checkBtn").addEventListener("click", () => {
+  if (selected.length < 2) return;
+
+  const s = selectedString();
+  const sr = s.split("").reverse().join("");
+
+  const match = WORDSET.find(w => !foundWords.has(w) && (w===s || w===sr));
+  if (!match) return; // keep selection so user can tap-back to adjust
+
+  foundWords.add(match);
+  markFound();
   renderChips();
-  updateStatus();
+  renderStatus();
+});
+
+document.getElementById("clearBtn").addEventListener("click", () => {
+  clearSelection();
+});
+
+// init
+buildGrid();
+renderChips();
+renderStatus();
 </script>
 </body>
 </html>
