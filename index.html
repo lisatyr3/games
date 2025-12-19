@@ -1,451 +1,363 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Winter Wonderland Word Search</title>
-  <style>
-    :root{
-      --tile:46px;
-      --gap:10px;
-      --border:#d9d9d9;
-      --selected:#cfe8ff;
-      --found:#bfe6c6;
-      --btnPrimary:#bfe6c6;
-      --btnSecondary:#e7e7e7;
-      --max:1100px;
-    }
-    body{
-      margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background:#fff;
-      color:#111;
-    }
-    .wrap{
-      max-width:var(--max);
-      margin:0 auto;
-      padding:28px 18px 40px;
-    }
-    h1{ margin:0 0 6px; font-size:44px; letter-spacing:-0.02em; }
-    .sub{ margin:0 0 18px; color:#444; font-size:18px; line-height:1.35; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Holiday Foods Word Search</title>
 
-    .layout{
-      display:flex;
-      gap:26px;
-      align-items:flex-start;
-    }
-    @media (max-width: 980px){
-      .layout{ flex-direction:column; }
-    }
+<style>
+:root{
+  --tile:46px;
+  --gap:10px;
+  --border:#d9d9d9;
+  --selected:#cfe8ff;
+  --found:#bfe6c6;
+  --primary:#bfe6c6;
+  --secondary:#e7e7e7;
+  --max:1100px;
+}
 
-    .grid{
-      display:grid;
-      gap:var(--gap);
-      user-select:none;
-      -webkit-user-select:none;
-      touch-action:manipulation;
-    }
-    .tile{
-      width:var(--tile);
-      height:var(--tile);
-      border:1px solid var(--border);
-      border-radius:10px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-weight:800;
-      font-size:20px;
-      cursor:pointer;
-      background:#fff;
-    }
-    .tile.sel{ background:var(--selected); }
-    .tile.found{ background:var(--found); }
-    /* if a found tile is currently selected, show selected color */
-    .tile.found.sel{ background:var(--selected); }
+body{
+  margin:0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
 
-    .side{
-      width:320px;
-      flex:0 0 320px;
-    }
-    .side h2{ margin:6px 0 12px; font-size:28px; }
-    .chips{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      margin-bottom:14px;
-    }
-    .chip{
-      padding:10px 14px;
-      border-radius:999px;
-      border:1px solid #d0d0d0;
-      font-weight:800;
-      font-size:14px;
-      background:#fff;
-    }
-    .chip.found{
-      background:var(--found);
-      border-color:transparent;
-    }
+.wrap{
+  max-width:var(--max);
+  margin:0 auto;
+  padding:28px 18px 40px;
+}
 
-    .controls{
-      display:flex;
-      gap:12px;
-      margin:12px 0 12px;
-      flex-wrap:wrap;
-    }
-    button{
-      border:0;
-      border-radius:10px;
-      padding:12px 16px;
-      font-weight:800;
-      font-size:16px;
-      cursor:pointer;
-    }
-    .primary{ background:var(--btnPrimary); }
-    .secondary{ background:var(--btnSecondary); }
+h1{ margin:0 0 6px; font-size:44px; }
+.sub{ margin:0 0 18px; color:#444; font-size:18px; }
 
-    .status{
-      font-size:18px;
-      font-weight:900;
-      margin-top:6px;
-    }
+.layout{
+  display:flex;
+  gap:26px;
+  align-items:flex-start;
+}
 
-    @media (max-width: 520px){
-      :root{ --tile:40px; --gap:8px; }
-      h1{ font-size:36px; }
-      .side{ width:100%; flex:1 1 auto; }
-    }
-  </style>
+/* STACK ON MOBILE */
+@media (max-width: 768px){
+  .layout{
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+.grid{
+  display:grid;
+  gap:var(--gap);
+  justify-content:center;
+  user-select:none;
+}
+
+.tile{
+  width:var(--tile);
+  height:var(--tile);
+  border:1px solid var(--border);
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:800;
+  font-size:20px;
+  cursor:pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tile.sel{ background:var(--selected); }
+.tile.found{ background:var(--found); }
+
+.side{
+  width:320px;
+}
+
+@media (max-width: 768px){
+  .side{
+    width:100%;
+    max-width:520px;
+  }
+}
+
+.side h2{ margin:6px 0 12px; font-size:28px; }
+
+.chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-bottom:14px;
+}
+
+.chip{
+  padding:10px 14px;
+  border-radius:999px;
+  border:1px solid #d0d0d0;
+  font-weight:800;
+  font-size:14px;
+}
+
+.chip.found{
+  background:var(--found);
+  border-color:transparent;
+}
+
+.controls{
+  display:flex;
+  gap:12px;
+  margin:12px 0;
+}
+
+button{
+  border:0;
+  border-radius:10px;
+  padding:12px 16px;
+  font-weight:800;
+  font-size:16px;
+  cursor:pointer;
+}
+
+.primary{ background:var(--primary); }
+.secondary{ background:#d7efe3; }
+
+.status{
+  font-size:18px;
+  font-weight:900;
+}
+
+/* SHRINK GRID ON SMALL PHONES */
+@media (max-width: 520px){
+  :root{
+    --tile:38px;
+    --gap:6px;
+  }
+}
+</style>
 </head>
 
 <body>
-  <div class="wrap">
-    <h1 id="title">Winter Wonderland</h1>
-    <p class="sub">
-      Click letters one at a time in a straight line (up, down, left, right, or diagonal).
-      Then click <b>Check</b>.
-    </p>
+<div class="wrap">
+  <h1>Holiday Foods</h1>
+  <p class="sub">
+    Click letters one at a time in a straight line (up, down, left, right, or diagonal),
+    then click <b>Check</b>.
+  </p>
 
-    <div class="layout">
-      <div>
-        <div id="grid" class="grid" aria-label="Word search grid"></div>
+  <div class="layout">
+    <div id="grid" class="grid"></div>
+
+    <aside class="side">
+      <h2>Find these words</h2>
+      <div id="chips" class="chips"></div>
+
+      <div class="controls">
+        <button id="checkBtn" class="primary">Check</button>
+        <button id="clearBtn" class="secondary">Clear</button>
       </div>
 
-      <aside class="side">
-        <h2>Find these words</h2>
-        <div id="chips" class="chips"></div>
-
-        <div class="controls">
-          <button id="checkBtn" class="primary" type="button">Check</button>
-          <button id="clearBtn" class="secondary" type="button">Clear</button>
-        </div>
-
-        <div id="status" class="status">Found 0 of 0</div>
-      </aside>
-    </div>
+      <div id="status" class="status">Found 0 of 0</div>
+    </aside>
   </div>
+</div>
 
 <script>
-/* =========================
-   SETTINGS (safe to change)
-   ========================= */
+/* ===== SETTINGS ===== */
 const COLS = 14;
 const ROWS = 11;
 
-// Tomorrow’s theme words (all will be placed)
 const WORDS = [
-  "AURORA",
-  "BLIZZARD",
+  "GINGERBREAD",
+  "TURKEY",
+  "HAM",
+  "STUFFING",
+  "CRANBERRY",
+  "PIE",
+  "GRAVY",
+  "CASSEROLE",
+  "COOKIES",
   "COCOA",
-  "FROST",
-  "GLACIER",
-  "ICICLE",
-  "IGLOO",
-  "MITTENS",
-  "PENGUIN",
-  "SCARF",
-  "SLEIGH",
-  "SNOWMAN"
+  "CANDYCANE",
+  "NOG"
 ];
 
-// Change this daily if you want a new puzzle without touching anything else:
-const SEED_STRING = "2025-12-18";
+const SEED_STRING = "2025-12-20";
 
-/* =========================
-   Seeded RNG (stable puzzle)
-   ========================= */
+/* ===== SEEDED RNG ===== */
 function xmur3(str){
   let h = 1779033703 ^ str.length;
   for (let i=0;i<str.length;i++){
     h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
-    h = (h << 13) | (h >>> 19);
+    h = (h<<13) | (h>>>19);
   }
   return function(){
-    h = Math.imul(h ^ (h >>> 16), 2246822507);
-    h = Math.imul(h ^ (h >>> 13), 3266489909);
-    h ^= (h >>> 16);
-    return h >>> 0;
+    h = Math.imul(h ^ (h>>>16), 2246822507);
+    h = Math.imul(h ^ (h>>>13), 3266489909);
+    h ^= (h>>>16);
+    return h>>>0;
   };
 }
 function mulberry32(a){
   return function(){
     let t = a += 0x6D2B79F5;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    t = Math.imul(t ^ (t>>>15), t | 1);
+    t ^= t + Math.imul(t ^ (t>>>7), t | 61);
+    return ((t ^ (t>>>14))>>>0)/4294967296;
   };
 }
 const seedFn = xmur3(SEED_STRING);
 let rand = mulberry32(seedFn());
-function rInt(n){ return Math.floor(rand() * n); }
-function pick(arr){ return arr[rInt(arr.length)]; }
+const rInt = n => Math.floor(rand()*n);
+const pick = a => a[rInt(a.length)];
 
-/* =========================
-   Grid generator (verified)
-   ========================= */
-
-// Avoid obvious left→right words by NOT allowing (dx=+1, dy=0)
+/* ===== GRID GENERATOR ===== */
 const DIRS = [
-  {dx:-1, dy:0},  // W (backwards horizontal ok)
-  {dx:0,  dy:1},  // S
-  {dx:0,  dy:-1}, // N
-  {dx:1,  dy:1},  // SE
-  {dx:-1, dy:-1}, // NW
-  {dx:1,  dy:-1}, // NE
-  {dx:-1, dy:1}   // SW
+  {dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1},
+  {dx:1,dy:1},{dx:-1,dy:-1},{dx:1,dy:-1},{dx:-1,dy:1}
 ];
 
-function inBounds(x,y){ return x>=0 && x<COLS && y>=0 && y<ROWS; }
+const inB = (x,y)=>x>=0&&x<COLS&&y>=0&&y<ROWS;
 
-function canPlace(grid, word, x0, y0, dir){
-  for (let i=0;i<word.length;i++){
-    const x = x0 + dir.dx*i;
-    const y = y0 + dir.dy*i;
-    if (!inBounds(x,y)) return false;
-    const cur = grid[y][x];
-    if (cur !== "" && cur !== word[i]) return false;
+function canPlace(g,w,x0,y0,d){
+  for(let i=0;i<w.length;i++){
+    const x=x0+d.dx*i, y=y0+d.dy*i;
+    if(!inB(x,y)) return false;
+    if(g[y][x] && g[y][x]!==w[i]) return false;
   }
   return true;
 }
 
-function placeWord(grid, word){
-  // Try many attempts; prefers diagonals by repeating them in the pool
-  const weightedDirs = [
-    DIRS[3],DIRS[4],DIRS[5],DIRS[6], // diagonals (more often)
-    DIRS[0],DIRS[1],DIRS[2]          // straight
-  ];
-
-  for (let tries=0; tries<1200; tries++){
-    const dir = pick(weightedDirs);
-    const x0 = rInt(COLS);
-    const y0 = rInt(ROWS);
-    if (!canPlace(grid, word, x0, y0, dir)) continue;
-
-    for (let i=0;i<word.length;i++){
-      const x = x0 + dir.dx*i;
-      const y = y0 + dir.dy*i;
-      grid[y][x] = word[i];
+function placeWord(g,w){
+  for(let t=0;t<1500;t++){
+    const d=pick(DIRS);
+    const x=rInt(COLS), y=rInt(ROWS);
+    if(!canPlace(g,w,x,y,d)) continue;
+    for(let i=0;i<w.length;i++){
+      g[y+d.dy*i][x+d.dx*i]=w[i];
     }
     return true;
   }
   return false;
 }
 
-function findWord(grid, word){
-  // Verify word exists in any of the allowed 8 directions including dx=+1,dy=0 for checking
-  const checkDirs = [
-    {dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1},
-    {dx:1,dy:1},{dx:-1,dy:-1},{dx:1,dy:-1},{dx:-1,dy:1}
-  ];
-  for (let y=0;y<ROWS;y++){
-    for (let x=0;x<COLS;x++){
-      for (const d of checkDirs){
-        let ok = true;
-        for (let i=0;i<word.length;i++){
-          const xx = x + d.dx*i;
-          const yy = y + d.dy*i;
-          if (!inBounds(xx,yy) || grid[yy][xx] !== word[i]) { ok=false; break; }
+function findWord(g,w){
+  for(let y=0;y<ROWS;y++){
+    for(let x=0;x<COLS;x++){
+      for(const d of DIRS){
+        let ok=true;
+        for(let i=0;i<w.length;i++){
+          const xx=x+d.dx*i, yy=y+d.dy*i;
+          if(!inB(xx,yy)||g[yy][xx]!==w[i]){ok=false;break;}
         }
-        if (ok) return true;
+        if(ok) return true;
       }
     }
   }
   return false;
 }
 
-function generateVerifiedGrid(words){
-  // Reset RNG each generation attempt to keep deterministic retry behavior per seed
+function generate(words){
   rand = mulberry32(seedFn());
-
-  for (let attempt=0; attempt<200; attempt++){
-    const grid = Array.from({length: ROWS}, () => Array.from({length: COLS}, () => ""));
-    const sorted = [...words].sort((a,b)=>b.length-a.length);
-
-    let placedAll = true;
-    for (const w of sorted){
-      if (!placeWord(grid, w)){ placedAll = false; break; }
+  for(let a=0;a<300;a++){
+    const g=Array.from({length:ROWS},()=>Array(COLS).fill(""));
+    for(const w of [...words].sort((a,b)=>b.length-a.length)){
+      placeWord(g,w);
     }
-    if (!placedAll) continue;
-
-    // Fill with high-frequency letters to avoid “wordy” filler
-    const filler = "EAIONRSTLUAENRSTL"; // boring, camouflaging
-    for (let y=0;y<ROWS;y++){
-      for (let x=0;x<COLS;x++){
-        if (grid[y][x] === ""){
-          grid[y][x] = filler[rInt(filler.length)];
-        }
+    const filler="EAIONRSTLUAENRSTL";
+    for(let y=0;y<ROWS;y++){
+      for(let x=0;x<COLS;x++){
+        if(!g[y][x]) g[y][x]=filler[rInt(filler.length)];
       }
     }
-
-    // Verify every word is truly present
-    let ok = true;
-    for (const w of words){
-      if (!findWord(grid, w)){ ok = false; break; }
-    }
-    if (ok) return grid;
+    if(words.every(w=>findWord(g,w))) return g;
   }
-
-  // Should not happen, but fail safely
-  throw new Error("Could not generate a valid puzzle. Try a different seed.");
+  throw new Error("Grid failed");
 }
 
-/* =========================
-   UI + Interaction (same as today)
-   ========================= */
-const gridEl = document.getElementById("grid");
-const chipsEl = document.getElementById("chips");
-const statusEl = document.getElementById("status");
+/* ===== UI ===== */
+const WORDSET = WORDS.map(w=>w.toUpperCase());
+const gridData = generate(WORDSET);
 
-const WORDSET = WORDS.map(w => w.toUpperCase().replace(/[^A-Z]/g,""));
-const foundWords = new Set();
-const foundCells = new Set(); // "x,y"
+const gridEl=document.getElementById("grid");
+const chipsEl=document.getElementById("chips");
+const statusEl=document.getElementById("status");
 
-let selected = [];    // [{x,y,el}]
-let lockedDir = null; // {dx,dy}
+let selected=[], locked=null, found=new Set();
 
-const gridData = generateVerifiedGrid(WORDSET);
+gridEl.style.gridTemplateColumns=`repeat(${COLS}, var(--tile))`;
 
-function k(x,y){ return x + "," + y; }
+gridData.forEach((row,y)=>{
+  row.forEach((l,x)=>{
+    const d=document.createElement("div");
+    d.className="tile";
+    d.textContent=l;
+    d.onclick=()=>tap(x,y,d);
+    gridEl.appendChild(d);
+  });
+});
 
-function renderChips(){
-  chipsEl.innerHTML = "";
-  for (const w of WORDSET){
-    const d = document.createElement("div");
-    d.className = "chip" + (foundWords.has(w) ? " found" : "");
-    d.textContent = w;
-    chipsEl.appendChild(d);
-  }
-}
+WORDSET.forEach(w=>{
+  const c=document.createElement("div");
+  c.className="chip";
+  c.textContent=w;
+  c.id="w-"+w;
+  chipsEl.appendChild(c);
+});
 
-function renderStatus(){
-  statusEl.textContent = `Found ${foundWords.size} of ${WORDSET.length}`;
-}
-
-function buildGrid(){
-  gridEl.innerHTML = "";
-  gridEl.style.gridTemplateColumns = `repeat(${COLS}, var(--tile))`;
-
-  for (let y=0;y<ROWS;y++){
-    for (let x=0;x<COLS;x++){
-      const t = document.createElement("div");
-      t.className = "tile";
-      t.textContent = gridData[y][x];
-      t.dataset.x = x;
-      t.dataset.y = y;
-      t.addEventListener("click", () => onTap(x,y,t));
-      gridEl.appendChild(t);
-    }
-  }
-}
-
-function clearSelection(){
-  selected.forEach(s => s.el.classList.remove("sel"));
-  selected = [];
-  lockedDir = null;
-}
+statusEl.textContent=`Found 0 of ${WORDSET.length}`;
 
 function step(a,b){
-  const dx = b.x - a.x;
-  const dy = b.y - a.y;
-  if (dx===0 && dy===0) return null;
-  if (Math.abs(dx)>1 || Math.abs(dy)>1) return null;
-  return {dx:Math.sign(dx), dy:Math.sign(dy)};
+  const dx=b.x-a.x, dy=b.y-a.y;
+  if(Math.abs(dx)>1||Math.abs(dy)>1||(!dx&&!dy)) return null;
+  return {dx:Math.sign(dx),dy:Math.sign(dy)};
 }
 
-function onTap(x,y,el){
-  // tap last selected again to undo
-  if (selected.length && selected[selected.length-1].x===x && selected[selected.length-1].y===y){
-    selected[selected.length-1].el.classList.remove("sel");
-    selected.pop();
-    if (selected.length < 2) lockedDir = null;
-    return;
+function tap(x,y,el){
+  if(selected.length){
+    const last=selected[selected.length-1];
+    if(last.x===x&&last.y===y){
+      el.classList.remove("sel");
+      selected.pop();
+      if(selected.length<2) locked=null;
+      return;
+    }
   }
+  if(selected.some(s=>s.x===x&&s.y===y)) return;
 
-  // prevent re-selecting same tile in the middle
-  if (selected.some(s => s.x===x && s.y===y)) return;
-
-  if (selected.length === 0){
+  if(!selected.length){
     selected.push({x,y,el});
     el.classList.add("sel");
     return;
   }
-
-  if (selected.length === 1){
-    const s = step(selected[0], {x,y});
-    if (!s) return;
-    lockedDir = s;
-    selected.push({x,y,el});
-    el.classList.add("sel");
-    return;
+  if(selected.length===1){
+    const s=step(selected[0],{x,y});
+    if(!s) return;
+    locked=s;
+  } else {
+    const s=step(selected[selected.length-1],{x,y});
+    if(!s||s.dx!==locked.dx||s.dy!==locked.dy) return;
   }
-
-  // must continue same direction and be contiguous
-  const last = selected[selected.length-1];
-  const s = step(last, {x,y});
-  if (!s) return;
-  if (s.dx !== lockedDir.dx || s.dy !== lockedDir.dy) return;
-
   selected.push({x,y,el});
   el.classList.add("sel");
 }
 
-function selectedString(){
-  return selected.map(s => gridData[s.y][s.x]).join("");
-}
+document.getElementById("checkBtn").onclick=()=>{
+  if(selected.length<2) return;
+  const str=selected.map(s=>gridData[s.y][s.x]).join("");
+  const rev=str.split("").reverse().join("");
+  const hit=WORDSET.find(w=>!found.has(w)&&(w===str||w===rev));
+  if(!hit) return;
+  found.add(hit);
+  selected.forEach(s=>s.el.classList.add("found"));
+  document.getElementById("w-"+hit).classList.add("found");
+  statusEl.textContent=`Found ${found.size} of ${WORDSET.length}`;
+  selected=[]; locked=null;
+};
 
-function markFound(){
-  selected.forEach(s => {
-    foundCells.add(k(s.x,s.y));
-    s.el.classList.add("found");
-    s.el.classList.remove("sel");
-  });
-  selected = [];
-  lockedDir = null;
-}
-
-document.getElementById("checkBtn").addEventListener("click", () => {
-  if (selected.length < 2) return;
-
-  const s = selectedString();
-  const sr = s.split("").reverse().join("");
-
-  const match = WORDSET.find(w => !foundWords.has(w) && (w===s || w===sr));
-  if (!match) return; // keep selection so user can tap-back to adjust
-
-  foundWords.add(match);
-  markFound();
-  renderChips();
-  renderStatus();
-});
-
-document.getElementById("clearBtn").addEventListener("click", () => {
-  clearSelection();
-});
-
-// init
-buildGrid();
-renderChips();
-renderStatus();
+document.getElementById("clearBtn").onclick=()=>{
+  selected.forEach(s=>s.el.classList.remove("sel"));
+  selected=[]; locked=null;
+};
 </script>
 </body>
 </html>
