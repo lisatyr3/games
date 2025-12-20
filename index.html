@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Holiday Foods Word Search</title>
+<title>Holiday Decor Word Search</title>
 
 <style>
 :root{
@@ -138,7 +138,7 @@ button{
 
 <body>
 <div class="wrap">
-  <h1>Holiday Foods</h1>
+  <h1>Holiday Decor</h1>
   <p class="sub">
     Click letters one at a time in a straight line (up, down, left, right, or diagonal),
     then click <b>Check</b>.
@@ -166,22 +166,26 @@ button{
 const COLS = 14;
 const ROWS = 11;
 
+/* Holiday Decor – Medium (10 words) */
 const WORDS = [
-  "GINGERBREAD",
-  "TURKEY",
-  "HAM",
-  "STUFFING",
-  "CRANBERRY",
-  "PIE",
-  "GRAVY",
-  "CASSEROLE",
-  "COOKIES",
-  "COCOA",
-  "CANDYCANE",
-  "NOG"
+  "ORNAMENTS",
+  "GARLAND",
+  "WREATH",
+  "TINSEL",
+  "LIGHTS",
+  "STOCKING",
+  "RIBBON",
+  "CANDLE",
+  "BAUBLE",
+  "STAR"
 ];
 
-const SEED_STRING = "2025-12-20";
+/* Change this each day to get a new puzzle layout */
+const SEED_STRING = "2025-12-21";
+
+/* Difficulty controls */
+const MAX_LTR = 2;        // max words placed left-to-right (→)
+const MIN_DIAGONAL = 2;   // require at least this many diagonal words
 
 /* ===== SEEDED RNG ===== */
 function xmur3(str){
@@ -212,8 +216,14 @@ const pick = a => a[rInt(a.length)];
 
 /* ===== GRID GENERATOR ===== */
 const DIRS = [
-  {dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1},
-  {dx:1,dy:1},{dx:-1,dy:-1},{dx:1,dy:-1},{dx:-1,dy:1}
+  {dx:1,dy:0, name:"LTR"},
+  {dx:-1,dy:0, name:"RTL"},
+  {dx:0,dy:1, name:"DOWN"},
+  {dx:0,dy:-1, name:"UP"},
+  {dx:1,dy:1, name:"D1"},
+  {dx:-1,dy:-1, name:"D2"},
+  {dx:1,dy:-1, name:"D3"},
+  {dx:-1,dy:1, name:"D4"}
 ];
 
 const inB = (x,y)=>x>=0&&x<COLS&&y>=0&&y<ROWS;
@@ -227,17 +237,17 @@ function canPlace(g,w,x0,y0,d){
   return true;
 }
 
-function placeWord(g,w){
-  for(let t=0;t<1500;t++){
-    const d=pick(DIRS);
+function placeWord(g,w,allowedDirs){
+  for(let t=0;t<1800;t++){
+    const d=pick(allowedDirs);
     const x=rInt(COLS), y=rInt(ROWS);
     if(!canPlace(g,w,x,y,d)) continue;
     for(let i=0;i<w.length;i++){
       g[y+d.dy*i][x+d.dx*i]=w[i];
     }
-    return true;
+    return d;
   }
-  return false;
+  return null;
 }
 
 function findWord(g,w){
@@ -258,20 +268,58 @@ function findWord(g,w){
 
 function generate(words){
   rand = mulberry32(seedFn());
-  for(let a=0;a<300;a++){
+
+  const sorted = [...words].sort((a,b)=>b.length-a.length);
+
+  // prefer non-LTR directions overall; allow a little LTR
+  const NON_LTR_DIRS = DIRS.filter(d => !(d.dx===1 && d.dy===0));
+  const ALL_DIRS = DIRS;
+
+  for(let attempt=0; attempt<600; attempt++){
     const g=Array.from({length:ROWS},()=>Array(COLS).fill(""));
-    for(const w of [...words].sort((a,b)=>b.length-a.length)){
-      placeWord(g,w);
+
+    let ltrCount = 0;
+    let diagCount = 0;
+
+    for(const w of sorted){
+      // If we've already hit max LTR, forbid it
+      let allowed = (ltrCount >= MAX_LTR) ? NON_LTR_DIRS : ALL_DIRS;
+
+      // Also bias away from LTR by giving it fewer chances:
+      // (do this by removing LTR from the pool most of the time)
+      if(ltrCount < MAX_LTR && rand() < 0.70){
+        allowed = NON_LTR_DIRS;
+      }
+
+      const placedDir = placeWord(g,w,allowed);
+      if(!placedDir){
+        // fail this attempt
+        continue;
+      }
+
+      if(placedDir.dx===1 && placedDir.dy===0) ltrCount++;
+      if(Math.abs(placedDir.dx)===1 && Math.abs(placedDir.dy)===1) diagCount++;
     }
+
+    // fill blanks
     const filler="EAIONRSTLUAENRSTL";
     for(let y=0;y<ROWS;y++){
       for(let x=0;x<COLS;x++){
         if(!g[y][x]) g[y][x]=filler[rInt(filler.length)];
       }
     }
-    if(words.every(w=>findWord(g,w))) return g;
+
+    // hard validation: all words must exist
+    if(!words.every(w=>findWord(g,w))) continue;
+
+    // difficulty validation
+    if(ltrCount > MAX_LTR) continue;
+    if(diagCount < MIN_DIAGONAL) continue;
+
+    return g;
   }
-  throw new Error("Grid failed");
+
+  throw new Error("Grid failed (try changing SEED_STRING).");
 }
 
 /* ===== UI ===== */
@@ -347,10 +395,12 @@ document.getElementById("checkBtn").onclick=()=>{
   const rev=str.split("").reverse().join("");
   const hit=WORDSET.find(w=>!found.has(w)&&(w===str||w===rev));
   if(!hit) return;
+
   found.add(hit);
   selected.forEach(s=>s.el.classList.add("found"));
   document.getElementById("w-"+hit).classList.add("found");
   statusEl.textContent=`Found ${found.size} of ${WORDSET.length}`;
+
   selected=[]; locked=null;
 };
 
@@ -361,3 +411,6 @@ document.getElementById("clearBtn").onclick=()=>{
 </script>
 </body>
 </html>
+
+
+ 
