@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Holiday Decor Word Search</title>
+<title>Under the Tree Word Search</title>
 
 <style>
 :root{
@@ -138,7 +138,7 @@ button{
 
 <body>
 <div class="wrap">
-  <h1>Holiday Decor</h1>
+  <h1>Under the Tree</h1>
   <p class="sub">
     Click letters one at a time in a straight line (up, down, left, right, or diagonal),
     then click <b>Check</b>.
@@ -166,26 +166,26 @@ button{
 const COLS = 14;
 const ROWS = 11;
 
-/* Holiday Decor – Medium (10 words) */
+/* Under the Tree – Medium */
 const WORDS = [
-  "ORNAMENTS",
-  "GARLAND",
-  "WREATH",
-  "TINSEL",
-  "LIGHTS",
-  "STOCKING",
+  "PRESENTS",
+  "BOX",
+  "BOW",
   "RIBBON",
-  "CANDLE",
-  "BAUBLE",
-  "STAR"
+  "WRAP",
+  "TOYS",
+  "TEDDY",
+  "DOLL",
+  "BLOCKS",
+  "TRAIN"
 ];
 
-/* Change this each day to get a new puzzle layout */
-const SEED_STRING = "2025-12-21";
+/* NEW DAY SEED */
+const SEED_STRING = "2025-12-22";
 
 /* Difficulty controls */
-const MAX_LTR = 2;        // max words placed left-to-right (→)
-const MIN_DIAGONAL = 2;   // require at least this many diagonal words
+const MAX_LTR = 2;
+const MIN_DIAGONAL = 2;
 
 /* ===== SEEDED RNG ===== */
 function xmur3(str){
@@ -216,14 +216,14 @@ const pick = a => a[rInt(a.length)];
 
 /* ===== GRID GENERATOR ===== */
 const DIRS = [
-  {dx:1,dy:0, name:"LTR"},
-  {dx:-1,dy:0, name:"RTL"},
-  {dx:0,dy:1, name:"DOWN"},
-  {dx:0,dy:-1, name:"UP"},
-  {dx:1,dy:1, name:"D1"},
-  {dx:-1,dy:-1, name:"D2"},
-  {dx:1,dy:-1, name:"D3"},
-  {dx:-1,dy:1, name:"D4"}
+  {dx:1,dy:0,name:"LTR"},
+  {dx:-1,dy:0,name:"RTL"},
+  {dx:0,dy:1,name:"DOWN"},
+  {dx:0,dy:-1,name:"UP"},
+  {dx:1,dy:1,name:"D1"},
+  {dx:-1,dy:-1,name:"D2"},
+  {dx:1,dy:-1,name:"D3"},
+  {dx:-1,dy:1,name:"D4"}
 ];
 
 const inB = (x,y)=>x>=0&&x<COLS&&y>=0&&y<ROWS;
@@ -237,9 +237,9 @@ function canPlace(g,w,x0,y0,d){
   return true;
 }
 
-function placeWord(g,w,allowedDirs){
+function placeWord(g,w,dirs){
   for(let t=0;t<1800;t++){
-    const d=pick(allowedDirs);
+    const d=pick(dirs);
     const x=rInt(COLS), y=rInt(ROWS);
     if(!canPlace(g,w,x,y,d)) continue;
     for(let i=0;i<w.length;i++){
@@ -268,40 +268,22 @@ function findWord(g,w){
 
 function generate(words){
   rand = mulberry32(seedFn());
+  const sorted=[...words].sort((a,b)=>b.length-a.length);
+  const NON_LTR=DIRS.filter(d=>!(d.dx===1&&d.dy===0));
 
-  const sorted = [...words].sort((a,b)=>b.length-a.length);
-
-  // prefer non-LTR directions overall; allow a little LTR
-  const NON_LTR_DIRS = DIRS.filter(d => !(d.dx===1 && d.dy===0));
-  const ALL_DIRS = DIRS;
-
-  for(let attempt=0; attempt<600; attempt++){
+  for(let a=0;a<600;a++){
     const g=Array.from({length:ROWS},()=>Array(COLS).fill(""));
-
-    let ltrCount = 0;
-    let diagCount = 0;
+    let ltr=0, diag=0;
 
     for(const w of sorted){
-      // If we've already hit max LTR, forbid it
-      let allowed = (ltrCount >= MAX_LTR) ? NON_LTR_DIRS : ALL_DIRS;
-
-      // Also bias away from LTR by giving it fewer chances:
-      // (do this by removing LTR from the pool most of the time)
-      if(ltrCount < MAX_LTR && rand() < 0.70){
-        allowed = NON_LTR_DIRS;
-      }
-
-      const placedDir = placeWord(g,w,allowed);
-      if(!placedDir){
-        // fail this attempt
-        continue;
-      }
-
-      if(placedDir.dx===1 && placedDir.dy===0) ltrCount++;
-      if(Math.abs(placedDir.dx)===1 && Math.abs(placedDir.dy)===1) diagCount++;
+      let dirs=(ltr>=MAX_LTR)?NON_LTR:DIRS;
+      if(ltr<MAX_LTR && rand()<0.7) dirs=NON_LTR;
+      const d=placeWord(g,w,dirs);
+      if(!d) continue;
+      if(d.dx===1&&d.dy===0) ltr++;
+      if(Math.abs(d.dx)===1&&Math.abs(d.dy)===1) diag++;
     }
 
-    // fill blanks
     const filler="EAIONRSTLUAENRSTL";
     for(let y=0;y<ROWS;y++){
       for(let x=0;x<COLS;x++){
@@ -309,17 +291,11 @@ function generate(words){
       }
     }
 
-    // hard validation: all words must exist
-    if(!words.every(w=>findWord(g,w))) continue;
-
-    // difficulty validation
-    if(ltrCount > MAX_LTR) continue;
-    if(diagCount < MIN_DIAGONAL) continue;
-
-    return g;
+    if(words.every(w=>findWord(g,w)) && ltr<=MAX_LTR && diag>=MIN_DIAGONAL){
+      return g;
+    }
   }
-
-  throw new Error("Grid failed (try changing SEED_STRING).");
+  throw new Error("Grid failed");
 }
 
 /* ===== UI ===== */
@@ -395,12 +371,10 @@ document.getElementById("checkBtn").onclick=()=>{
   const rev=str.split("").reverse().join("");
   const hit=WORDSET.find(w=>!found.has(w)&&(w===str||w===rev));
   if(!hit) return;
-
   found.add(hit);
   selected.forEach(s=>s.el.classList.add("found"));
   document.getElementById("w-"+hit).classList.add("found");
   statusEl.textContent=`Found ${found.size} of ${WORDSET.length}`;
-
   selected=[]; locked=null;
 };
 
