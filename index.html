@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Under the Tree Word Search</title>
+<title>Santa's Reindeer Word Search</title>
 
 <style>
 :root{
@@ -37,7 +37,6 @@ h1{ margin:0 0 6px; font-size:44px; }
   align-items:flex-start;
 }
 
-/* STACK ON MOBILE */
 @media (max-width: 768px){
   .layout{
     flex-direction: column;
@@ -126,7 +125,6 @@ button{
   font-weight:900;
 }
 
-/* SHRINK GRID ON SMALL PHONES */
 @media (max-width: 520px){
   :root{
     --tile:38px;
@@ -138,7 +136,7 @@ button{
 
 <body>
 <div class="wrap">
-  <h1>Under the Tree</h1>
+  <h1>Santa’s Reindeer</h1>
   <p class="sub">
     Click letters one at a time in a straight line (up, down, left, right, or diagonal),
     then click <b>Check</b>.
@@ -148,7 +146,7 @@ button{
     <div id="grid" class="grid"></div>
 
     <aside class="side">
-      <h2>Find these words</h2>
+      <h2>Find these reindeer</h2>
       <div id="chips" class="chips"></div>
 
       <div class="controls">
@@ -166,26 +164,26 @@ button{
 const COLS = 14;
 const ROWS = 11;
 
-/* Under the Tree – Medium */
+/* Santa’s Reindeer */
 const WORDS = [
-  "PRESENTS",
-  "BOX",
-  "BOW",
-  "RIBBON",
-  "WRAP",
-  "TOYS",
-  "TEDDY",
-  "DOLL",
-  "BLOCKS",
-  "TRAIN"
+  "DASHER",
+  "DANCER",
+  "PRANCER",
+  "VIXEN",
+  "COMET",
+  "CUPID",
+  "DONNER",
+  "BLITZEN",
+  "RUDOLPH"
 ];
 
 /* NEW DAY SEED */
-const SEED_STRING = "2025-12-22";
+const SEED_STRING = "2025-12-23";
 
 /* Difficulty controls */
 const MAX_LTR = 2;
 const MIN_DIAGONAL = 2;
+const MIN_WORD_SPACING = 3; // prevents clustering
 
 /* ===== SEEDED RNG ===== */
 function xmur3(str){
@@ -216,17 +214,15 @@ const pick = a => a[rInt(a.length)];
 
 /* ===== GRID GENERATOR ===== */
 const DIRS = [
-  {dx:1,dy:0,name:"LTR"},
-  {dx:-1,dy:0,name:"RTL"},
-  {dx:0,dy:1,name:"DOWN"},
-  {dx:0,dy:-1,name:"UP"},
-  {dx:1,dy:1,name:"D1"},
-  {dx:-1,dy:-1,name:"D2"},
-  {dx:1,dy:-1,name:"D3"},
-  {dx:-1,dy:1,name:"D4"}
+  {dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1},
+  {dx:1,dy:1},{dx:-1,dy:-1},{dx:1,dy:-1},{dx:-1,dy:1}
 ];
 
 const inB = (x,y)=>x>=0&&x<COLS&&y>=0&&y<ROWS;
+
+function farEnough(x,y,starts){
+  return starts.every(p=>Math.hypot(p.x-x,p.y-y)>=MIN_WORD_SPACING);
+}
 
 function canPlace(g,w,x0,y0,d){
   for(let i=0;i<w.length;i++){
@@ -237,14 +233,16 @@ function canPlace(g,w,x0,y0,d){
   return true;
 }
 
-function placeWord(g,w,dirs){
+function placeWord(g,w,dirs,starts){
   for(let t=0;t<1800;t++){
     const d=pick(dirs);
     const x=rInt(COLS), y=rInt(ROWS);
+    if(!farEnough(x,y,starts)) continue;
     if(!canPlace(g,w,x,y,d)) continue;
     for(let i=0;i<w.length;i++){
       g[y+d.dy*i][x+d.dx*i]=w[i];
     }
+    starts.push({x,y});
     return d;
   }
   return null;
@@ -273,12 +271,13 @@ function generate(words){
 
   for(let a=0;a<600;a++){
     const g=Array.from({length:ROWS},()=>Array(COLS).fill(""));
+    const starts=[];
     let ltr=0, diag=0;
 
     for(const w of sorted){
       let dirs=(ltr>=MAX_LTR)?NON_LTR:DIRS;
       if(ltr<MAX_LTR && rand()<0.7) dirs=NON_LTR;
-      const d=placeWord(g,w,dirs);
+      const d=placeWord(g,w,dirs,starts);
       if(!d) continue;
       if(d.dx===1&&d.dy===0) ltr++;
       if(Math.abs(d.dx)===1&&Math.abs(d.dy)===1) diag++;
@@ -385,6 +384,3 @@ document.getElementById("clearBtn").onclick=()=>{
 </script>
 </body>
 </html>
-
-
- 
