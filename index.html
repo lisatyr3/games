@@ -37,17 +37,25 @@ h1{ margin:0 0 6px; font-size:44px; }
   align-items:flex-start;
 }
 
+/* MOBILE STACK */
 @media (max-width: 768px){
   .layout{
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
+  }
+
+  /* 🔑 CRITICAL iOS iframe FIX */
+  .grid{
+    justify-content: flex-start;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-left: 6px;
   }
 }
 
 .grid{
   display:grid;
   gap:var(--gap);
-  justify-content:center;
   user-select:none;
 }
 
@@ -125,6 +133,7 @@ button{
   font-weight:900;
 }
 
+/* SMALL PHONES */
 @media (max-width: 520px){
   :root{
     --tile:38px;
@@ -164,7 +173,6 @@ button{
 const COLS = 14;
 const ROWS = 11;
 
-/* Santa’s Reindeer */
 const WORDS = [
   "DASHER",
   "DANCER",
@@ -177,15 +185,12 @@ const WORDS = [
   "RUDOLPH"
 ];
 
-/* NEW DAY SEED */
 const SEED_STRING = "2025-12-23";
-
-/* Difficulty controls */
 const MAX_LTR = 2;
 const MIN_DIAGONAL = 2;
-const MIN_WORD_SPACING = 3; // prevents clustering
+const MIN_WORD_SPACING = 3;
 
-/* ===== SEEDED RNG ===== */
+/* ===== RNG ===== */
 function xmur3(str){
   let h = 1779033703 ^ str.length;
   for (let i=0;i<str.length;i++){
@@ -212,7 +217,7 @@ let rand = mulberry32(seedFn());
 const rInt = n => Math.floor(rand()*n);
 const pick = a => a[rInt(a.length)];
 
-/* ===== GRID GENERATOR ===== */
+/* ===== GRID ===== */
 const DIRS = [
   {dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1},
   {dx:1,dy:1},{dx:-1,dy:-1},{dx:1,dy:-1},{dx:-1,dy:1}
