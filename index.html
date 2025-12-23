@@ -37,18 +37,22 @@ h1{ margin:0 0 6px; font-size:44px; }
   align-items:flex-start;
 }
 
+/* MOBILE STACK + SAFE SCROLL */
 @media (max-width: 768px){
   .layout{
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
   }
 }
 
 .grid{
   display:grid;
   gap:var(--gap);
-  justify-content:center;
   user-select:none;
+  overflow-x:auto;
+  overflow-y:hidden;
+  -webkit-overflow-scrolling: touch;
+  padding:6px;
 }
 
 .tile{
@@ -178,9 +182,10 @@ const WORDS = [
   "OVENMITTS"
 ];
 
-const SEED_STRING = "2025-12-24-holiday-baking-north-pole-oven";
+/* AGGRESSIVE DAILY SEED */
+const SEED_STRING = "2025-12-25-baking";
 
-/* ===== SEEDED RNG ===== */
+/* ===== RNG ===== */
 function xmur3(str){
   let h = 1779033703 ^ str.length;
   for (let i=0;i<str.length;i++){
@@ -207,7 +212,7 @@ let rand = mulberry32(seedFn());
 const rInt = n => Math.floor(rand()*n);
 const pick = a => a[rInt(a.length)];
 
-/* ===== GRID GENERATOR (LOCKED) ===== */
+/* ===== GRID LOGIC ===== */
 const DIRS = [
   {dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1},
   {dx:1,dy:1},{dx:-1,dy:-1},{dx:1,dy:-1},{dx:-1,dy:1}
@@ -225,7 +230,7 @@ function canPlace(g,w,x0,y0,d){
 }
 
 function placeWord(g,w){
-  for(let t=0;t<1500;t++){
+  for(let t=0;t<2000;t++){
     const d=pick(DIRS);
     const x=rInt(COLS), y=rInt(ROWS);
     if(!canPlace(g,w,x,y,d)) continue;
@@ -255,7 +260,7 @@ function findWord(g,w){
 
 function generate(words){
   rand = mulberry32(seedFn());
-  for(let a=0;a<300;a++){
+  for(let a=0;a<400;a++){
     const g=Array.from({length:ROWS},()=>Array(COLS).fill(""));
     for(const w of [...words].sort((a,b)=>b.length-a.length)){
       placeWord(g,w);
