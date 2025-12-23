@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Holiday Baking Word Search</title>
+<title>Santa’s Reindeer Word Search</title>
 
 <style>
 :root{
@@ -37,23 +37,17 @@ h1{ margin:0 0 6px; font-size:44px; }
   align-items:flex-start;
 }
 
-/* MOBILE STACK + iOS iframe FIX */
 @media (max-width: 768px){
   .layout{
     flex-direction: column;
-    align-items: stretch;
-  }
-  .grid{
-    justify-content: flex-start;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    padding-left: 6px;
+    align-items: center;
   }
 }
 
 .grid{
   display:grid;
   gap:var(--gap);
+  justify-content:center;
   user-select:none;
 }
 
@@ -142,7 +136,7 @@ button{
 
 <body>
 <div class="wrap">
-  <h1>Holiday Baking</h1>
+  <h1>Santa’s Reindeer</h1>
   <p class="sub">
     Click letters one at a time in a straight line (up, down, left, right, or diagonal),
     then click <b>Check</b>.
@@ -152,7 +146,7 @@ button{
     <div id="grid" class="grid"></div>
 
     <aside class="side">
-      <h2>Find the baking words</h2>
+      <h2>Find these words</h2>
       <div id="chips" class="chips"></div>
 
       <div class="controls">
@@ -166,34 +160,26 @@ button{
 </div>
 
 <script>
-/* ===== SETTINGS ===== */
 const COLS = 14;
 const ROWS = 11;
 
-/* Holiday Baking – HARD */
 const WORDS = [
-  "GINGERBREAD",
-  "SUGARCOOKIES",
-  "SHORTBREAD",
-  "ROLLINGPIN",
-  "COOKIECUTTERS",
-  "VANILLA",
-  "BAKINGSPICES",
-  "CINNAMON",
-  "FROSTING",
-  "PIECRUST",
-  "OVENMITTS"
+  "DASHER",
+  "DANCER",
+  "PRANCER",
+  "VIXEN",
+  "COMET",
+  "CUPID",
+  "DONNER",
+  "BLITZEN",
+  "RUDOLPH",
+  "REINDEER",
+  "HARNESS"
 ];
 
-/* TOMORROW */
-const SEED_STRING = "2025-12-24";
+const SEED_STRING = "2025-12-21-santas-reindeer-north-pole-blizzard";
 
-/* Difficulty controls */
-const MAX_LTR = 2;
-const MIN_DIAGONAL = 3;
-const MIN_WORD_SPACING = 3;
-
-/* ===== RNG ===== */
+/* ==== SEEDED RNG ==== */
 function xmur3(str){
   let h = 1779033703 ^ str.length;
   for (let i=0;i<str.length;i++){
@@ -220,17 +206,13 @@ let rand = mulberry32(seedFn());
 const rInt = n => Math.floor(rand()*n);
 const pick = a => a[rInt(a.length)];
 
-/* ===== GRID LOGIC ===== */
+/* ==== GRID LOGIC ==== */
 const DIRS = [
   {dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1},
   {dx:1,dy:1},{dx:-1,dy:-1},{dx:1,dy:-1},{dx:-1,dy:1}
 ];
 
 const inB = (x,y)=>x>=0&&x<COLS&&y>=0&&y<ROWS;
-
-function farEnough(x,y,starts){
-  return starts.every(p=>Math.hypot(p.x-x,p.y-y)>=MIN_WORD_SPACING);
-}
 
 function canPlace(g,w,x0,y0,d){
   for(let i=0;i<w.length;i++){
@@ -241,19 +223,17 @@ function canPlace(g,w,x0,y0,d){
   return true;
 }
 
-function placeWord(g,w,dirs,starts){
-  for(let t=0;t<1800;t++){
-    const d=pick(dirs);
+function placeWord(g,w){
+  for(let t=0;t<1500;t++){
+    const d=pick(DIRS);
     const x=rInt(COLS), y=rInt(ROWS);
-    if(!farEnough(x,y,starts)) continue;
     if(!canPlace(g,w,x,y,d)) continue;
     for(let i=0;i<w.length;i++){
       g[y+d.dy*i][x+d.dx*i]=w[i];
     }
-    starts.push({x,y});
-    return d;
+    return true;
   }
-  return null;
+  return false;
 }
 
 function findWord(g,w){
@@ -274,38 +254,23 @@ function findWord(g,w){
 
 function generate(words){
   rand = mulberry32(seedFn());
-  const sorted=[...words].sort((a,b)=>b.length-a.length);
-  const NON_LTR=DIRS.filter(d=>!(d.dx===1&&d.dy===0));
-
-  for(let a=0;a<600;a++){
+  for(let a=0;a<300;a++){
     const g=Array.from({length:ROWS},()=>Array(COLS).fill(""));
-    const starts=[];
-    let ltr=0, diag=0;
-
-    for(const w of sorted){
-      let dirs=(ltr>=MAX_LTR)?NON_LTR:DIRS;
-      if(ltr<MAX_LTR && rand()<0.7) dirs=NON_LTR;
-      const d=placeWord(g,w,dirs,starts);
-      if(!d) continue;
-      if(d.dx===1&&d.dy===0) ltr++;
-      if(Math.abs(d.dx)===1&&Math.abs(d.dy)===1) diag++;
+    for(const w of [...words].sort((a,b)=>b.length-a.length)){
+      placeWord(g,w);
     }
-
     const filler="EAIONRSTLUAENRSTL";
     for(let y=0;y<ROWS;y++){
       for(let x=0;x<COLS;x++){
         if(!g[y][x]) g[y][x]=filler[rInt(filler.length)];
       }
     }
-
-    if(words.every(w=>findWord(g,w)) && ltr<=MAX_LTR && diag>=MIN_DIAGONAL){
-      return g;
-    }
+    if(words.every(w=>findWord(g,w))) return g;
   }
   throw new Error("Grid failed");
 }
 
-/* ===== UI ===== */
+/* ==== UI ==== */
 const WORDSET = WORDS.map(w=>w.toUpperCase());
 const gridData = generate(WORDSET);
 
