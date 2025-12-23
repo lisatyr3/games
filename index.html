@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Santa's Reindeer Word Search</title>
+<title>Holiday Baking Word Search</title>
 
 <style>
 :root{
@@ -37,14 +37,12 @@ h1{ margin:0 0 6px; font-size:44px; }
   align-items:flex-start;
 }
 
-/* MOBILE STACK */
+/* MOBILE STACK + iOS iframe FIX */
 @media (max-width: 768px){
   .layout{
     flex-direction: column;
     align-items: stretch;
   }
-
-  /* 🔑 CRITICAL iOS iframe FIX */
   .grid{
     justify-content: flex-start;
     overflow-x: auto;
@@ -133,7 +131,6 @@ button{
   font-weight:900;
 }
 
-/* SMALL PHONES */
 @media (max-width: 520px){
   :root{
     --tile:38px;
@@ -145,7 +142,7 @@ button{
 
 <body>
 <div class="wrap">
-  <h1>Santa’s Reindeer</h1>
+  <h1>Holiday Baking</h1>
   <p class="sub">
     Click letters one at a time in a straight line (up, down, left, right, or diagonal),
     then click <b>Check</b>.
@@ -155,7 +152,7 @@ button{
     <div id="grid" class="grid"></div>
 
     <aside class="side">
-      <h2>Find these reindeer</h2>
+      <h2>Find the baking words</h2>
       <div id="chips" class="chips"></div>
 
       <div class="controls">
@@ -173,21 +170,27 @@ button{
 const COLS = 14;
 const ROWS = 11;
 
+/* Holiday Baking – HARD */
 const WORDS = [
-  "DASHER",
-  "DANCER",
-  "PRANCER",
-  "VIXEN",
-  "COMET",
-  "CUPID",
-  "DONNER",
-  "BLITZEN",
-  "RUDOLPH"
+  "GINGERBREAD",
+  "SUGARCOOKIES",
+  "SHORTBREAD",
+  "ROLLINGPIN",
+  "COOKIECUTTERS",
+  "VANILLA",
+  "BAKINGSPICES",
+  "CINNAMON",
+  "FROSTING",
+  "PIECRUST",
+  "OVENMITTS"
 ];
 
-const SEED_STRING = "2025-12-23";
+/* TOMORROW */
+const SEED_STRING = "2025-12-24";
+
+/* Difficulty controls */
 const MAX_LTR = 2;
-const MIN_DIAGONAL = 2;
+const MIN_DIAGONAL = 3;
 const MIN_WORD_SPACING = 3;
 
 /* ===== RNG ===== */
@@ -217,7 +220,7 @@ let rand = mulberry32(seedFn());
 const rInt = n => Math.floor(rand()*n);
 const pick = a => a[rInt(a.length)];
 
-/* ===== GRID ===== */
+/* ===== GRID LOGIC ===== */
 const DIRS = [
   {dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1},
   {dx:1,dy:1},{dx:-1,dy:-1},{dx:1,dy:-1},{dx:-1,dy:1}
