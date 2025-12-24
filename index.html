@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Holiday Baking Word Search</title>
+<title>Christmas Traditions Word Search</title>
 
 <style>
 :root{
@@ -37,22 +37,19 @@ h1{ margin:0 0 6px; font-size:44px; }
   align-items:flex-start;
 }
 
-/* MOBILE STACK + SAFE SCROLL */
+/* STACK ON MOBILE */
 @media (max-width: 768px){
   .layout{
     flex-direction: column;
-    align-items: stretch;
+    align-items: center;
   }
 }
 
 .grid{
   display:grid;
   gap:var(--gap);
+  justify-content:center;
   user-select:none;
-  overflow-x:auto;
-  overflow-y:hidden;
-  -webkit-overflow-scrolling: touch;
-  padding:6px;
 }
 
 .tile{
@@ -73,15 +70,10 @@ h1{ margin:0 0 6px; font-size:44px; }
 .tile.sel{ background:var(--selected); }
 .tile.found{ background:var(--found); }
 
-.side{
-  width:320px;
-}
+.side{ width:320px; }
 
 @media (max-width: 768px){
-  .side{
-    width:100%;
-    max-width:520px;
-  }
+  .side{ width:100%; max-width:520px; }
 }
 
 .side h2{ margin:6px 0 12px; font-size:28px; }
@@ -129,18 +121,22 @@ button{
   font-weight:900;
 }
 
+/* SMALL PHONES: MAKE THE GRID FIT (NO LEFT CUTOFF) */
 @media (max-width: 520px){
   :root{
-    --tile:38px;
-    --gap:6px;
+    --tile:28px;  /* <-- key change: fits 14 cols */
+    --gap:4px;
   }
+  h1{ font-size:34px; }
+  .sub{ font-size:16px; }
+  .tile{ font-size:14px; }
 }
 </style>
 </head>
 
 <body>
 <div class="wrap">
-  <h1>Holiday Baking</h1>
+  <h1>Christmas Traditions</h1>
   <p class="sub">
     Click letters one at a time in a straight line (up, down, left, right, or diagonal),
     then click <b>Check</b>.
@@ -150,7 +146,7 @@ button{
     <div id="grid" class="grid"></div>
 
     <aside class="side">
-      <h2>Find the baking words</h2>
+      <h2>Find these words</h2>
       <div id="chips" class="chips"></div>
 
       <div class="controls">
@@ -168,24 +164,30 @@ button{
 const COLS = 14;
 const ROWS = 11;
 
+/* Christmas Traditions (keep <= 14 chars each) */
 const WORDS = [
-  "GINGERBREAD",
-  "SUGARCOOKIES",
-  "SHORTBREAD",
-  "ROLLINGPIN",
-  "COOKIECUTTERS",
-  "VANILLA",
-  "BAKINGSPICES",
-  "CINNAMON",
-  "FROSTING",
-  "PIECRUST",
-  "OVENMITTS"
+  "CAROLS",
+  "NATIVITY",
+  "MISTLETOE",
+  "STOCKINGS",
+  "ORNAMENT",
+  "PRESENTS",
+  "LIGHTS",
+  "CANDLES",
+  "COOKIES",
+  "SANTA",
+  "WREATH",
+  "TREE"
 ];
 
-/* AGGRESSIVE DAILY SEED */
-const SEED_STRING = "2025-12-25-baking";
+/* Wednesday */
+const SEED_STRING = "2025-12-24-Z"; // <- aggressive seed (change letter if you want a totally different layout)
 
-/* ===== RNG ===== */
+/* ===== STRONGER BIAS (SAFE) ===== */
+const MAX_LTR = 2;       // cap easy left-to-right placements
+const MIN_DIAGONAL = 4;  // insist on diagonals being present
+
+/* ===== SEEDED RNG ===== */
 function xmur3(str){
   let h = 1779033703 ^ str.length;
   for (let i=0;i<str.length;i++){
@@ -212,11 +214,22 @@ let rand = mulberry32(seedFn());
 const rInt = n => Math.floor(rand()*n);
 const pick = a => a[rInt(a.length)];
 
-/* ===== GRID LOGIC ===== */
+/* ===== GRID GENERATOR ===== */
 const DIRS = [
-  {dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1},
-  {dx:1,dy:1},{dx:-1,dy:-1},{dx:1,dy:-1},{dx:-1,dy:1}
+  {dx: 1, dy: 0, name:"LTR"},
+  {dx:-1, dy: 0, name:"RTL"},
+  {dx: 0, dy: 1, name:"DOWN"},
+  {dx: 0, dy:-1, name:"UP"},
+  {dx: 1, dy: 1, name:"D1"},
+  {dx:-1, dy:-1, name:"D2"},
+  {dx: 1, dy:-1, name:"D3"},
+  {dx:-1, dy: 1, name:"D4"}
 ];
+
+const LTR = DIRS[0];
+const RTL = DIRS[1];
+const VERT = [DIRS[2], DIRS[3]];
+const DIAG = [DIRS[4], DIRS[5], DIRS[6], DIRS[7]];
 
 const inB = (x,y)=>x>=0&&x<COLS&&y>=0&&y<ROWS;
 
@@ -229,17 +242,17 @@ function canPlace(g,w,x0,y0,d){
   return true;
 }
 
-function placeWord(g,w){
-  for(let t=0;t<2000;t++){
-    const d=pick(DIRS);
-    const x=rInt(COLS), y=rInt(ROWS);
+function placeWord(g,w,dirPool){
+  for(let t=0;t<2200;t++){
+    const d = pick(dirPool);
+    const x = rInt(COLS), y = rInt(ROWS);
     if(!canPlace(g,w,x,y,d)) continue;
     for(let i=0;i<w.length;i++){
-      g[y+d.dy*i][x+d.dx*i]=w[i];
+      g[y+d.dy*i][x+d.dx*i] = w[i];
     }
-    return true;
+    return d;
   }
-  return false;
+  return null;
 }
 
 function findWord(g,w){
@@ -258,22 +271,64 @@ function findWord(g,w){
   return false;
 }
 
+/* weighted dir pool = more diagonals, fewer LTR */
+function buildDirPool(ltrUsed){
+  const pool = [];
+
+  // Strong diagonal bias: 8 diagonal entries
+  for(let i=0;i<8;i++) pool.push(pick(DIAG));
+
+  // Vertical bias: 5 vertical entries
+  for(let i=0;i<5;i++) pool.push(pick(VERT));
+
+  // Some RTL: 3 entries
+  for(let i=0;i<3;i++) pool.push(RTL);
+
+  // Limited LTR: only if still under cap
+  if(ltrUsed < MAX_LTR){
+    pool.push(LTR); // 1 entry only
+  }
+
+  return pool;
+}
+
 function generate(words){
   rand = mulberry32(seedFn());
-  for(let a=0;a<400;a++){
-    const g=Array.from({length:ROWS},()=>Array(COLS).fill(""));
-    for(const w of [...words].sort((a,b)=>b.length-a.length)){
-      placeWord(g,w);
+  const sorted = [...words].sort((a,b)=>b.length-a.length);
+
+  for(let attempt=0; attempt<900; attempt++){
+    const g = Array.from({length:ROWS},()=>Array(COLS).fill(""));
+    let ltrCount = 0;
+    let diagCount = 0;
+
+    let success = true;
+
+    for(const w of sorted){
+      const pool = buildDirPool(ltrCount);
+      const d = placeWord(g, w, pool);
+      if(!d){ success=false; break; }
+
+      if(d.dx===1 && d.dy===0) ltrCount++;
+      if(Math.abs(d.dx)===1 && Math.abs(d.dy)===1) diagCount++;
     }
+
+    if(!success) continue;
+
     const filler="EAIONRSTLUAENRSTL";
     for(let y=0;y<ROWS;y++){
       for(let x=0;x<COLS;x++){
         if(!g[y][x]) g[y][x]=filler[rInt(filler.length)];
       }
     }
-    if(words.every(w=>findWord(g,w))) return g;
+
+    if(!words.every(w=>findWord(g,w))) continue;
+    if(ltrCount > MAX_LTR) continue;
+    if(diagCount < MIN_DIAGONAL) continue;
+
+    return g;
   }
-  throw new Error("Grid failed");
+
+  throw new Error("Grid failed (try changing SEED_STRING).");
 }
 
 /* ===== UI ===== */
@@ -349,10 +404,12 @@ document.getElementById("checkBtn").onclick=()=>{
   const rev=str.split("").reverse().join("");
   const hit=WORDSET.find(w=>!found.has(w)&&(w===str||w===rev));
   if(!hit) return;
+
   found.add(hit);
   selected.forEach(s=>s.el.classList.add("found"));
   document.getElementById("w-"+hit).classList.add("found");
   statusEl.textContent=`Found ${found.size} of ${WORDSET.length}`;
+
   selected=[]; locked=null;
 };
 
