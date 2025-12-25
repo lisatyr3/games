@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Christmas Traditions Word Search</title>
+<title>Christmas Morning Word Search</title>
 
 <style>
 :root{
@@ -37,7 +37,6 @@ h1{ margin:0 0 6px; font-size:44px; }
   align-items:flex-start;
 }
 
-/* STACK ON MOBILE */
 @media (max-width: 768px){
   .layout{
     flex-direction: column;
@@ -121,10 +120,10 @@ button{
   font-weight:900;
 }
 
-/* SMALL PHONES: MAKE THE GRID FIT (NO LEFT CUTOFF) */
+/* SMALL PHONES — FIT GRID */
 @media (max-width: 520px){
   :root{
-    --tile:28px;  /* <-- key change: fits 14 cols */
+    --tile:28px;
     --gap:4px;
   }
   h1{ font-size:34px; }
@@ -136,7 +135,7 @@ button{
 
 <body>
 <div class="wrap">
-  <h1>Christmas Traditions</h1>
+  <h1>Christmas Morning</h1>
   <p class="sub">
     Click letters one at a time in a straight line (up, down, left, right, or diagonal),
     then click <b>Check</b>.
@@ -164,30 +163,30 @@ button{
 const COLS = 14;
 const ROWS = 11;
 
-/* Christmas Traditions (keep <= 14 chars each) */
+/* Christmas Morning */
 const WORDS = [
-  "CAROLS",
-  "NATIVITY",
-  "MISTLETOE",
+  "SUNRISE",
   "STOCKINGS",
-  "ORNAMENT",
   "PRESENTS",
-  "LIGHTS",
-  "CANDLES",
-  "COOKIES",
-  "SANTA",
-  "WREATH",
+  "WRAPPING",
+  "PAJAMAS",
+  "HOTCOCOA",
+  "FAMILY",
+  "SMILES",
+  "SURPRISE",
+  "BATTERIES",
+  "CAMERA",
   "TREE"
 ];
 
-/* Wednesday */
-const SEED_STRING = "2025-12-24-Z"; // <- aggressive seed (change letter if you want a totally different layout)
+/* Aggressive seed = totally new layout */
+const SEED_STRING = "2025-12-26-M";
 
-/* ===== STRONGER BIAS (SAFE) ===== */
-const MAX_LTR = 2;       // cap easy left-to-right placements
-const MIN_DIAGONAL = 4;  // insist on diagonals being present
+/* ===== STRONG BIAS (LOCKED) ===== */
+const MAX_LTR = 2;
+const MIN_DIAGONAL = 4;
 
-/* ===== SEEDED RNG ===== */
+/* ===== RNG ===== */
 function xmur3(str){
   let h = 1779033703 ^ str.length;
   for (let i=0;i<str.length;i++){
@@ -214,22 +213,16 @@ let rand = mulberry32(seedFn());
 const rInt = n => Math.floor(rand()*n);
 const pick = a => a[rInt(a.length)];
 
-/* ===== GRID GENERATOR ===== */
+/* ===== GRID LOGIC ===== */
 const DIRS = [
-  {dx: 1, dy: 0, name:"LTR"},
-  {dx:-1, dy: 0, name:"RTL"},
-  {dx: 0, dy: 1, name:"DOWN"},
-  {dx: 0, dy:-1, name:"UP"},
-  {dx: 1, dy: 1, name:"D1"},
-  {dx:-1, dy:-1, name:"D2"},
-  {dx: 1, dy:-1, name:"D3"},
-  {dx:-1, dy: 1, name:"D4"}
+  {dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1},
+  {dx:1,dy:1},{dx:-1,dy:-1},{dx:1,dy:-1},{dx:-1,dy:1}
 ];
 
 const LTR = DIRS[0];
 const RTL = DIRS[1];
-const VERT = [DIRS[2], DIRS[3]];
-const DIAG = [DIRS[4], DIRS[5], DIRS[6], DIRS[7]];
+const VERT = [DIRS[2],DIRS[3]];
+const DIAG = [DIRS[4],DIRS[5],DIRS[6],DIRS[7]];
 
 const inB = (x,y)=>x>=0&&x<COLS&&y>=0&&y<ROWS;
 
@@ -244,11 +237,11 @@ function canPlace(g,w,x0,y0,d){
 
 function placeWord(g,w,dirPool){
   for(let t=0;t<2200;t++){
-    const d = pick(dirPool);
-    const x = rInt(COLS), y = rInt(ROWS);
+    const d=pick(dirPool);
+    const x=rInt(COLS), y=rInt(ROWS);
     if(!canPlace(g,w,x,y,d)) continue;
     for(let i=0;i<w.length;i++){
-      g[y+d.dy*i][x+d.dx*i] = w[i];
+      g[y+d.dy*i][x+d.dx*i]=w[i];
     }
     return d;
   }
@@ -271,48 +264,31 @@ function findWord(g,w){
   return false;
 }
 
-/* weighted dir pool = more diagonals, fewer LTR */
 function buildDirPool(ltrUsed){
-  const pool = [];
-
-  // Strong diagonal bias: 8 diagonal entries
+  const pool=[];
   for(let i=0;i<8;i++) pool.push(pick(DIAG));
-
-  // Vertical bias: 5 vertical entries
   for(let i=0;i<5;i++) pool.push(pick(VERT));
-
-  // Some RTL: 3 entries
   for(let i=0;i<3;i++) pool.push(RTL);
-
-  // Limited LTR: only if still under cap
-  if(ltrUsed < MAX_LTR){
-    pool.push(LTR); // 1 entry only
-  }
-
+  if(ltrUsed<MAX_LTR) pool.push(LTR);
   return pool;
 }
 
 function generate(words){
   rand = mulberry32(seedFn());
-  const sorted = [...words].sort((a,b)=>b.length-a.length);
+  const sorted=[...words].sort((a,b)=>b.length-a.length);
 
-  for(let attempt=0; attempt<900; attempt++){
-    const g = Array.from({length:ROWS},()=>Array(COLS).fill(""));
-    let ltrCount = 0;
-    let diagCount = 0;
-
-    let success = true;
+  for(let a=0;a<900;a++){
+    const g=Array.from({length:ROWS},()=>Array(COLS).fill(""));
+    let ltr=0, diag=0;
+    let ok=true;
 
     for(const w of sorted){
-      const pool = buildDirPool(ltrCount);
-      const d = placeWord(g, w, pool);
-      if(!d){ success=false; break; }
-
-      if(d.dx===1 && d.dy===0) ltrCount++;
-      if(Math.abs(d.dx)===1 && Math.abs(d.dy)===1) diagCount++;
+      const d=placeWord(g,w,buildDirPool(ltr));
+      if(!d){ok=false;break;}
+      if(d.dx===1&&d.dy===0) ltr++;
+      if(Math.abs(d.dx)===1&&Math.abs(d.dy)===1) diag++;
     }
-
-    if(!success) continue;
+    if(!ok||ltr>MAX_LTR||diag<MIN_DIAGONAL) continue;
 
     const filler="EAIONRSTLUAENRSTL";
     for(let y=0;y<ROWS;y++){
@@ -321,14 +297,9 @@ function generate(words){
       }
     }
 
-    if(!words.every(w=>findWord(g,w))) continue;
-    if(ltrCount > MAX_LTR) continue;
-    if(diagCount < MIN_DIAGONAL) continue;
-
-    return g;
+    if(words.every(w=>findWord(g,w))) return g;
   }
-
-  throw new Error("Grid failed (try changing SEED_STRING).");
+  throw new Error("Grid failed");
 }
 
 /* ===== UI ===== */
@@ -404,12 +375,10 @@ document.getElementById("checkBtn").onclick=()=>{
   const rev=str.split("").reverse().join("");
   const hit=WORDSET.find(w=>!found.has(w)&&(w===str||w===rev));
   if(!hit) return;
-
   found.add(hit);
   selected.forEach(s=>s.el.classList.add("found"));
   document.getElementById("w-"+hit).classList.add("found");
   statusEl.textContent=`Found ${found.size} of ${WORDSET.length}`;
-
   selected=[]; locked=null;
 };
 
