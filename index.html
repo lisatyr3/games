@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Christmas Morning Word Search</title>
+<title>Backyard Birds Word Search</title>
 
 <style>
 :root{
@@ -135,7 +135,7 @@ button{
 
 <body>
 <div class="wrap">
-  <h1>Christmas Morning</h1>
+  <h1>Backyard Birds</h1>
   <p class="sub">
     Click letters one at a time in a straight line (up, down, left, right, or diagonal),
     then click <b>Check</b>.
@@ -145,7 +145,7 @@ button{
     <div id="grid" class="grid"></div>
 
     <aside class="side">
-      <h2>Find these words</h2>
+      <h2>Find these birds</h2>
       <div id="chips" class="chips"></div>
 
       <div class="controls">
@@ -163,24 +163,24 @@ button{
 const COLS = 14;
 const ROWS = 11;
 
-/* Christmas Morning */
+/* Backyard Birds */
 const WORDS = [
-  "SUNRISE",
-  "STOCKINGS",
-  "PRESENTS",
-  "WRAPPING",
-  "PAJAMAS",
-  "HOTCOCOA",
-  "FAMILY",
-  "SMILES",
-  "SURPRISE",
-  "BATTERIES",
-  "CAMERA",
-  "TREE"
+  "ROBIN",
+  "CARDINAL",
+  "BLUEJAY",
+  "SPARROW",
+  "FINCH",
+  "CHICKADEE",
+  "WOODPECKER",
+  "DOVE",
+  "WREN",
+  "WARBLER",
+  "MOCKINGBIRD",
+  "GOLDFINCH"
 ];
 
-/* Aggressive seed = totally new layout */
-const SEED_STRING = "2025-12-26-M";
+/* Aggressive seed for a fresh layout */
+const SEED_STRING = "2025-12-27-B";
 
 /* ===== STRONG BIAS (LOCKED) ===== */
 const MAX_LTR = 2;
@@ -375,10 +375,12 @@ document.getElementById("checkBtn").onclick=()=>{
   const rev=str.split("").reverse().join("");
   const hit=WORDSET.find(w=>!found.has(w)&&(w===str||w===rev));
   if(!hit) return;
+
   found.add(hit);
   selected.forEach(s=>s.el.classList.add("found"));
   document.getElementById("w-"+hit).classList.add("found");
   statusEl.textContent=`Found ${found.size} of ${WORDSET.length}`;
+
   selected=[]; locked=null;
 };
 
