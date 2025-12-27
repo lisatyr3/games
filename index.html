@@ -13,7 +13,7 @@
   --selected:#cfe8ff;
   --found:#bfe6c6;
   --primary:#bfe6c6;
-  --secondary:#e7e7e7;
+  --secondary:#d7efe3;
   --max:1100px;
 }
 
@@ -131,14 +131,14 @@ button{
   .tile{ font-size:14px; }
 }
 
-/* Tighter fix for iOS Safari iframe left crop on small phones */
+/* Balanced fix for iOS Safari iframe cropping on small phones */
 @media (max-width: 480px) {
   .wrap {
-    padding-left: 4px !important;
-    padding-right: 4px !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
   }
   .layout {
-    gap: 10px;
+    gap: 14px;
   }
 }
 </style>
@@ -169,6 +169,7 @@ button{
   </div>
 </div>
 
+<!-- The script remains exactly the same as before -->
 <script>
 /* ===== SETTINGS ===== */
 const COLS = 14;
