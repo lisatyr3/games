@@ -130,6 +130,17 @@ button{
   .sub{ font-size:16px; }
   .tile{ font-size:14px; }
 }
+
+/* Fix for iOS Safari iframe left-side cropping on small phones */
+@media (max-width: 480px) {
+  .wrap {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+  .layout {
+    gap: 16px;
+  }
+}
 </style>
 </head>
 
