@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Weekend Fun Word Search</title>
+<title>Sunday Fun Word Search</title>
 
 <style>
 :root{
@@ -13,7 +13,7 @@
   --selected:#cfe8ff;
   --found:#bfe6c6;
   --primary:#bfe6c6;
-  --secondary:#d7efe3;
+  --secondary:#e7e7e7;
   --max:1100px;
 }
 
@@ -37,6 +37,7 @@ h1{ margin:0 0 6px; font-size:44px; }
   align-items:flex-start;
 }
 
+/* STACK ON MOBILE */
 @media (max-width: 768px){
   .layout{
     flex-direction: column;
@@ -120,7 +121,7 @@ button{
   font-weight:900;
 }
 
-/* SMALL PHONES — FIT GRID */
+/* SMALL PHONES — TILE SHRINK */
 @media (max-width: 520px){
   :root{
     --tile:28px;
@@ -131,14 +132,14 @@ button{
   .tile{ font-size:14px; }
 }
 
-/* Balanced mobile padding to prevent iOS crop */
-@media (max-width: 480px) {
-  .wrap {
-    padding-left: 12px !important;
-    padding-right: 12px !important;
-  }
-  .layout {
-    gap: 20px;
+/* MOBILE FIX — allow horizontal scroll ONLY if needed */
+@media (max-width: 520px){
+  .grid{
+    overflow-x:auto;
+    -webkit-overflow-scrolling: touch;
+    justify-content:flex-start;
+    padding-left:6px;
+    padding-right:6px;
   }
 }
 </style>
@@ -146,7 +147,7 @@ button{
 
 <body>
 <div class="wrap">
-  <h1>Weekend Fun</h1>
+  <h1>Sunday Fun</h1>
   <p class="sub">
     Click letters one at a time in a straight line (up, down, left, right, or diagonal),
     then click <b>Check</b>.
@@ -174,26 +175,26 @@ button{
 const COLS = 14;
 const ROWS = 11;
 
-/* Weekend Fun */
+/* Sunday Fun */
 const WORDS = [
-  "BARBECUE",
-  "PICNIC",
-  "HIKE",
-  "MOVIE",
-  "BEACH",
-  "CAMPING",
-  "GARDENING",
-  "BIKING",
-  "READING",
-  "NAP",
   "BRUNCH",
-  "GAME"
+  "PICNIC",
+  "FAMILYTIME",
+  "BOARDGAMES",
+  "WALK",
+  "RELAX",
+  "COFFEE",
+  "LAUGHTER",
+  "SUNSHINE",
+  "NAP",
+  "MOVIENIGHT",
+  "FRIENDS"
 ];
 
-/* New seed for fresh layout */
-const SEED_STRING = "2025-12-26";
+/* Fresh layout */
+const SEED_STRING = "2026-01-05-S";
 
-/* ===== STRONG BIAS (LOCKED) ===== */
+/* STRONG BIAS — LOCKED */
 const MAX_LTR = 2;
 const MIN_DIAGONAL = 4;
 
