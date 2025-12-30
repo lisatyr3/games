@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sunday Fun Word Search</title>
+<title>Automobiles Word Search</title>
 
 <style>
 :root{
@@ -50,6 +50,17 @@ h1{ margin:0 0 6px; font-size:44px; }
   gap:var(--gap);
   justify-content:center;
   user-select:none;
+}
+
+/* MOBILE FIX — allow horizontal scroll only if needed */
+@media (max-width: 520px){
+  .grid{
+    overflow-x:auto;
+    -webkit-overflow-scrolling: touch;
+    justify-content:flex-start;
+    padding-left:6px;
+    padding-right:6px;
+  }
 }
 
 .tile{
@@ -121,7 +132,7 @@ button{
   font-weight:900;
 }
 
-/* SMALL PHONES — TILE SHRINK */
+/* SMALL PHONES — SHRINK TILES */
 @media (max-width: 520px){
   :root{
     --tile:28px;
@@ -131,23 +142,12 @@ button{
   .sub{ font-size:16px; }
   .tile{ font-size:14px; }
 }
-
-/* MOBILE FIX — allow horizontal scroll ONLY if needed */
-@media (max-width: 520px){
-  .grid{
-    overflow-x:auto;
-    -webkit-overflow-scrolling: touch;
-    justify-content:flex-start;
-    padding-left:6px;
-    padding-right:6px;
-  }
-}
 </style>
 </head>
 
 <body>
 <div class="wrap">
-  <h1>Sunday Fun</h1>
+  <h1>Automobiles</h1>
   <p class="sub">
     Click letters one at a time in a straight line (up, down, left, right, or diagonal),
     then click <b>Check</b>.
@@ -175,24 +175,24 @@ button{
 const COLS = 14;
 const ROWS = 11;
 
-/* Sunday Fun */
+/* Automobiles */
 const WORDS = [
-  "BRUNCH",
-  "PICNIC",
-  "FAMILYTIME",
-  "BOARDGAMES",
-  "WALK",
-  "RELAX",
-  "COFFEE",
-  "LAUGHTER",
-  "SUNSHINE",
-  "NAP",
-  "MOVIENIGHT",
-  "FRIENDS"
+  "SEDAN",
+  "COUPE",
+  "CONVERTIBLE",
+  "SUV",
+  "TRUCK",
+  "MINIVAN",
+  "ENGINE",
+  "TRANSMISSION",
+  "STEERING",
+  "BRAKES",
+  "TIRES",
+  "HEADLIGHTS"
 ];
 
-/* Fresh layout */
-const SEED_STRING = "2026-01-05-S";
+/* Fresh aggressive seed */
+const SEED_STRING = "2026-01-06-AUTO";
 
 /* STRONG BIAS — LOCKED */
 const MAX_LTR = 2;
