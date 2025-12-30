@@ -50,18 +50,6 @@ h1{ margin:0 0 6px; font-size:44px; }
   gap:var(--gap);
   justify-content:center;
   user-select:none;
-  touch-action: pan-x; /* allow horizontal swipe */
-}
-
-/* MOBILE: allow horizontal scroll */
-@media (max-width: 520px){
-  .grid{
-    overflow-x:auto;
-    -webkit-overflow-scrolling: touch;
-    justify-content:flex-start;
-    padding-left:6px;
-    padding-right:6px;
-  }
 }
 
 .tile{
@@ -75,7 +63,7 @@ h1{ margin:0 0 6px; font-size:44px; }
   font-weight:800;
   font-size:20px;
   cursor:pointer;
-  touch-action:none; /* CRITICAL: allow taps */
+  touch-action:none;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -133,15 +121,15 @@ button{
   font-weight:900;
 }
 
-/* SMALL PHONES */
+/* SMALL PHONES — FORCE FIT, NO SCROLL */
 @media (max-width: 520px){
   :root{
-    --tile:28px;
+    --tile:24px;
     --gap:4px;
   }
-  h1{ font-size:34px; }
-  .sub{ font-size:16px; }
-  .tile{ font-size:14px; }
+  h1{ font-size:32px; }
+  .sub{ font-size:15px; }
+  .tile{ font-size:13px; }
 }
 </style>
 </head>
@@ -177,13 +165,21 @@ const COLS = 14;
 const ROWS = 11;
 
 const WORDS = [
-  "SEDAN","COUPE","SUV","TRUCK","MINIVAN",
-  "ENGINE","BRAKES","TIRES","STEERING",
-  "TRANSMISSION","HEADLIGHTS","BUMPER"
+  "SEDAN",
+  "COUPE",
+  "SUV",
+  "TRUCK",
+  "MINIVAN",
+  "ENGINE",
+  "BRAKES",
+  "TIRES",
+  "STEERING",
+  "TRANSMISSION",
+  "HEADLIGHTS",
+  "BUMPER"
 ];
 
-/* Change this daily if NOT auto-rotating */
-const SEED_STRING = "2026-01-07-AUTO";
+const SEED_STRING = "2026-01-08-AUTO";
 
 /* ===== RNG ===== */
 function xmur3(str){
@@ -212,7 +208,7 @@ let rand = mulberry32(seedFn());
 const rInt = n => Math.floor(rand()*n);
 const pick = a => a[rInt(a.length)];
 
-/* ===== GRID LOGIC ===== */
+/* ===== GRID ===== */
 const DIRS = [
   {dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1},
   {dx:1,dy:1},{dx:-1,dy:-1},{dx:1,dy:-1},{dx:-1,dy:1}
