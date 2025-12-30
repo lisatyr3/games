@@ -50,9 +50,10 @@ h1{ margin:0 0 6px; font-size:44px; }
   gap:var(--gap);
   justify-content:center;
   user-select:none;
+  touch-action: pan-x; /* allow horizontal swipe */
 }
 
-/* MOBILE FIX — allow horizontal scroll only if needed */
+/* MOBILE: allow horizontal scroll */
 @media (max-width: 520px){
   .grid{
     overflow-x:auto;
@@ -74,7 +75,7 @@ h1{ margin:0 0 6px; font-size:44px; }
   font-weight:800;
   font-size:20px;
   cursor:pointer;
-  touch-action: manipulation;
+  touch-action:none; /* CRITICAL: allow taps */
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -132,7 +133,7 @@ button{
   font-weight:900;
 }
 
-/* SMALL PHONES — SHRINK TILES */
+/* SMALL PHONES */
 @media (max-width: 520px){
   :root{
     --tile:28px;
@@ -149,8 +150,8 @@ button{
 <div class="wrap">
   <h1>Automobiles</h1>
   <p class="sub">
-    Click letters one at a time in a straight line (up, down, left, right, or diagonal),
-    then click <b>Check</b>.
+    Tap letters in a straight line (up, down, left, right, or diagonal),
+    then tap <b>Check</b>.
   </p>
 
   <div class="layout">
@@ -175,28 +176,14 @@ button{
 const COLS = 14;
 const ROWS = 11;
 
-/* Automobiles */
 const WORDS = [
-  "SEDAN",
-  "COUPE",
-  "CONVERTIBLE",
-  "SUV",
-  "TRUCK",
-  "MINIVAN",
-  "ENGINE",
-  "TRANSMISSION",
-  "STEERING",
-  "BRAKES",
-  "TIRES",
-  "HEADLIGHTS"
+  "SEDAN","COUPE","SUV","TRUCK","MINIVAN",
+  "ENGINE","BRAKES","TIRES","STEERING",
+  "TRANSMISSION","HEADLIGHTS","BUMPER"
 ];
 
-/* Fresh aggressive seed */
-const SEED_STRING = "2026-01-06-AUTO";
-
-/* STRONG BIAS — LOCKED */
-const MAX_LTR = 2;
-const MIN_DIAGONAL = 4;
+/* Change this daily if NOT auto-rotating */
+const SEED_STRING = "2026-01-07-AUTO";
 
 /* ===== RNG ===== */
 function xmur3(str){
@@ -231,11 +218,6 @@ const DIRS = [
   {dx:1,dy:1},{dx:-1,dy:-1},{dx:1,dy:-1},{dx:-1,dy:1}
 ];
 
-const LTR = DIRS[0];
-const RTL = DIRS[1];
-const VERT = [DIRS[2],DIRS[3]];
-const DIAG = [DIRS[4],DIRS[5],DIRS[6],DIRS[7]];
-
 const inB = (x,y)=>x>=0&&x<COLS&&y>=0&&y<ROWS;
 
 function canPlace(g,w,x0,y0,d){
@@ -247,71 +229,31 @@ function canPlace(g,w,x0,y0,d){
   return true;
 }
 
-function placeWord(g,w,dirPool){
-  for(let t=0;t<2200;t++){
-    const d=pick(dirPool);
+function placeWord(g,w){
+  for(let t=0;t<2000;t++){
+    const d=pick(DIRS);
     const x=rInt(COLS), y=rInt(ROWS);
     if(!canPlace(g,w,x,y,d)) continue;
     for(let i=0;i<w.length;i++){
       g[y+d.dy*i][x+d.dx*i]=w[i];
     }
-    return d;
-  }
-  return null;
-}
-
-function findWord(g,w){
-  for(let y=0;y<ROWS;y++){
-    for(let x=0;x<COLS;x++){
-      for(const d of DIRS){
-        let ok=true;
-        for(let i=0;i<w.length;i++){
-          const xx=x+d.dx*i, yy=y+d.dy*i;
-          if(!inB(xx,yy)||g[yy][xx]!==w[i]){ok=false;break;}
-        }
-        if(ok) return true;
-      }
-    }
+    return true;
   }
   return false;
 }
 
-function buildDirPool(ltrUsed){
-  const pool=[];
-  for(let i=0;i<8;i++) pool.push(pick(DIAG));
-  for(let i=0;i<5;i++) pool.push(pick(VERT));
-  for(let i=0;i<3;i++) pool.push(RTL);
-  if(ltrUsed<MAX_LTR) pool.push(LTR);
-  return pool;
-}
-
 function generate(words){
-  rand = mulberry32(seedFn());
-  const sorted=[...words].sort((a,b)=>b.length-a.length);
-
-  for(let a=0;a<900;a++){
-    const g=Array.from({length:ROWS},()=>Array(COLS).fill(""));
-    let ltr=0, diag=0;
-    let ok=true;
-
-    for(const w of sorted){
-      const d=placeWord(g,w,buildDirPool(ltr));
-      if(!d){ok=false;break;}
-      if(d.dx===1&&d.dy===0) ltr++;
-      if(Math.abs(d.dx)===1&&Math.abs(d.dy)===1) diag++;
-    }
-    if(!ok||ltr>MAX_LTR||diag<MIN_DIAGONAL) continue;
-
-    const filler="EAIONRSTLUAENRSTL";
-    for(let y=0;y<ROWS;y++){
-      for(let x=0;x<COLS;x++){
-        if(!g[y][x]) g[y][x]=filler[rInt(filler.length)];
-      }
-    }
-
-    if(words.every(w=>findWord(g,w))) return g;
+  const g=Array.from({length:ROWS},()=>Array(COLS).fill(""));
+  for(const w of [...words].sort((a,b)=>b.length-a.length)){
+    placeWord(g,w);
   }
-  throw new Error("Grid failed");
+  const filler="EAIONRSTLUAENRSTL";
+  for(let y=0;y<ROWS;y++){
+    for(let x=0;x<COLS;x++){
+      if(!g[y][x]) g[y][x]=filler[rInt(filler.length)];
+    }
+  }
+  return g;
 }
 
 /* ===== UI ===== */
@@ -387,12 +329,10 @@ document.getElementById("checkBtn").onclick=()=>{
   const rev=str.split("").reverse().join("");
   const hit=WORDSET.find(w=>!found.has(w)&&(w===str||w===rev));
   if(!hit) return;
-
   found.add(hit);
   selected.forEach(s=>s.el.classList.add("found"));
   document.getElementById("w-"+hit).classList.add("found");
   statusEl.textContent=`Found ${found.size} of ${WORDSET.length}`;
-
   selected=[]; locked=null;
 };
 
