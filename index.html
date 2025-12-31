@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Automobiles Word Search</title>
+<title>New Year’s Eve Word Search</title>
 
 <style>
 :root{
@@ -136,7 +136,7 @@ button{
 
 <body>
 <div class="wrap">
-  <h1>Automobiles</h1>
+  <h1>New Year’s Eve</h1>
   <p class="sub">
     Tap letters in a straight line (up, down, left, right, or diagonal),
     then tap <b>Check</b>.
@@ -164,22 +164,24 @@ button{
 const COLS = 14;
 const ROWS = 11;
 
+/* New Year’s Eve words */
 const WORDS = [
-  "SEDAN",
-  "COUPE",
-  "SUV",
-  "TRUCK",
-  "MINIVAN",
-  "ENGINE",
-  "BRAKES",
-  "TIRES",
-  "STEERING",
-  "TRANSMISSION",
-  "HEADLIGHTS",
-  "BUMPER"
+  "COUNTDOWN",
+  "MIDNIGHT",
+  "FIREWORKS",
+  "CONFETTI",
+  "CHAMPAGNE",
+  "TOAST",
+  "SPARKLE",
+  "CELEBRATE",
+  "PARTY",
+  "BALLOONS",
+  "RESOLUTION",
+  "NEWYEAR"
 ];
 
-const SEED_STRING = "2026-01-08-AUTO";
+/* New seed for a fresh layout */
+const SEED_STRING = "2026-01-01-NYE";
 
 /* ===== RNG ===== */
 function xmur3(str){
