@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Spa Day Word Search</title>
+<title>A Walk In The Woods Word Search</title>
 
 <style>
 :root{
@@ -136,7 +136,7 @@ button{
 
 <body>
 <div class="wrap">
-  <h1>Spa Day</h1>
+  <h1>A Walk In The Woods</h1>
   <p class="sub">
     Tap letters in a straight line (up, down, left, right, or diagonal),
     then tap <b>Check</b>.
@@ -164,24 +164,24 @@ button{
 const COLS = 14;
 const ROWS = 11;
 
-/* Spa Day words */
+/* A Walk In The Woods */
 const WORDS = [
-  "MASSAGE",
-  "FACIAL",
-  "STEAM",
-  "AROMATHERAPY",
-  "HOTSTONES",
-  "MANICURE",
-  "PEDICURE",
-  "RELAX",
-  "SOAK",
-  "ESSENTIALOILS",
-  "ROBE",
-  "CANDLES"
+  "TRAIL",
+  "PINE",
+  "OAK",
+  "LEAVES",
+  "FERNS",
+  "MUSHROOMS",
+  "STREAM",
+  "WILDLIFE",
+  "BIRDS",
+  "ACORNS",
+  "BARK",
+  "FOOTPATH"
 ];
 
 /* Fresh seed */
-const SEED_STRING = "2026-01-06-SPA";
+const SEED_STRING = "2026-01-09-WOODS";
 
 /* ===== RNG ===== */
 function xmur3(str){
@@ -341,3 +341,4 @@ document.getElementById("clearBtn").onclick=()=>{
 </script>
 </body>
 </html>
+
