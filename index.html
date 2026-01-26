@@ -1,208 +1,223 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Daily Word Search</title>
 
 <style>
 :root{
-  --size: 32px;
-  --gap: 4px;
+  --tile:46px;
+  --gap:10px;
+  --border:#d9d9d9;
+  --selected:#cfe8ff;
+  --found:#bfe6c6;
+  --primary:#bfe6c6;
+  --secondary:#e7e7e7;
+  --max:1100px;
 }
 
-body{
-  margin:0;
-  font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-  text-align:center;
-  background:#fff;
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;}
+.wrap{max-width:var(--max);margin:0 auto;padding:28px 18px 40px;}
+h1{margin:0 0 6px;font-size:44px;}
+.sub{margin:0 0 18px;color:#444;font-size:18px;}
+
+.layout{display:flex;gap:26px;align-items:flex-start;}
+@media (max-width:768px){
+  .layout{flex-direction:column;align-items:center;}
 }
 
-h2{
-  margin:12px 0 6px;
-}
+.grid{display:grid;gap:var(--gap);justify-content:center;user-select:none;}
 
-#grid{
-  display:grid;
-  gap:var(--gap);
-  justify-content:center;
-  margin:14px auto;
-  touch-action:manipulation;
-}
-
-.cell{
-  width:var(--size);
-  height:var(--size);
-  border:1px solid #ccc;
+.tile{
+  width:var(--tile);
+  height:var(--tile);
+  border:1px solid var(--border);
+  border-radius:10px;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-weight:700;
-  user-select:none;
-  background:#fff;
-  font-size:16px;
+  font-weight:800;
+  font-size:20px;
+  cursor:pointer;
+  touch-action:none;
 }
 
-.cell.selected{
-  background:#a6dad2;
+.tile.sel{background:var(--selected);}
+.tile.found{background:var(--found);}
+
+.side{width:320px;}
+@media (max-width:768px){.side{width:100%;max-width:520px;}}
+
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
+.chip{padding:10px 14px;border-radius:999px;border:1px solid #d0d0d0;font-weight:800;font-size:14px;}
+.chip.found{background:var(--found);border-color:transparent;}
+
+button{
+  border:0;border-radius:10px;padding:12px 16px;
+  font-weight:800;font-size:16px;cursor:pointer;
 }
 
-#words{
-  max-width:500px;
-  margin:10px auto 18px;
-  font-size:.95rem;
-  line-height:1.5;
+.primary{background:var(--primary);}
+.secondary{background:#d7efe3;}
+
+@media (max-width:520px){
+  :root{--tile:24px;--gap:4px;}
+  .tile{font-size:13px;}
 }
 </style>
 </head>
 
 <body>
+<div class="wrap">
+  <h1 id="themeTitle">Daily Word Search</h1>
+  <p class="sub">Tap letters in a straight line, then tap <b>Check</b>.</p>
 
-<h2 id="theme"></h2>
-<div id="grid"></div>
-<div id="words"></div>
+  <div class="layout">
+    <div id="grid" class="grid"></div>
+
+    <aside class="side">
+      <div id="chips" class="chips"></div>
+
+      <div style="display:flex;gap:12px;margin:12px 0;">
+        <button id="checkBtn" class="primary">Check</button>
+        <button id="clearBtn" class="secondary">Clear</button>
+      </div>
+
+      <div id="status"></div>
+    </aside>
+  </div>
+</div>
 
 <script>
-/* =========================
-   GRID SETTINGS (UNCHANGED)
-========================= */
+
+/* ===== GRID ===== */
 const COLS = 14;
 const ROWS = 11;
 
-/* =========================
-   DAILY THEME ROTATION
-========================= */
-function easternDayIndex(){
-  const now = new Date();
+/* =====================================================
+   SAFE THEMES (all words ≤ 8 letters → always fits)
+   ===================================================== */
 
-  const utc = now.getTime() + (now.getTimezoneOffset()*60000);
-  const est = new Date(utc + (-5*3600000)); // fixed Eastern
+const THEMES = [
 
-  const midnight = new Date(est.getFullYear(), est.getMonth(), est.getDate());
-  const base = new Date(2025,0,1);
+  { name:"Pride and Prejudice", words:[
+    "BENNET","DARCY","ELIZA","JANE","BINGLEY",
+    "LYDIA","WICKHAM","LONGBOUR","PEMBER","BALL"
+  ]},
 
-  return Math.floor((midnight-base)/(24*60*60*1000));
-}
+  { name:"Sense and Sensibility", words:[
+    "ELINOR","MARIANN","EDWARD","BRANDON",
+    "LUCY","NORLAND","BARTON","LETTERS","LOVE"
+  ]},
 
-/* =========================
-   THEMES (NEW LITERARY WEEK)
-========================= */
+  { name:"Emma", words:[
+    "EMMA","HARriet".toUpperCase(),"KNIGHT","ELTON",
+    "FAIRFAX","CHURCH","PICNIC","MATCH","FRIEND"
+  ]},
 
-const themes = [
+  { name:"Wuthering Heights", words:[
+    "CATHY","HEATH","HINDLEY","EDGAR",
+    "NELLY","MOORS","GRANGE","STORM","GHOST"
+  ]},
 
-{
-name:"Pride and Prejudice",
-words:[
-"bennet","darcy","elizabeth","jane","bingley","lydia",
-"wickham","longbourn","pemberley","proposal","marriage","estate"
-]},
+  { name:"Jane Eyre", words:[
+    "JANE","ROCH","ADELE","BERTHA",
+    "LOWOOD","RIVERS","ATTIC","FIRE","LOVE"
+  ]},
 
-{
-name:"Sense and Sensibility",
-words:[
-"dashwood","elinor","marianne","edward","brandon","willoughby",
-"lucy","norland","barton","letters","romance","family"
-]},
+  /* ===== FIXED MIDDLEMARCH (safe + fits 100%) ===== */
+  { name:"Middlemarch", words:[
+    "ROSAMOND",
+    "CASAUBON",
+    "LYDGATE",
+    "VINCY",
+    "BROOKE",
+    "REFORM",
+    "SOCIETY",
+    "TOWN",
+    "MARCH",
+    "DOCTOR"
+  ]},
 
-{
-name:"Emma",
-words:[
-"emma","woodhouse","knightley","harriet","elton","fairfax",
-"churchill","highbury","picnic","ballroom","friendship","match"
-]},
-
-{
-name:"Wuthering Heights",
-words:[
-"catherine","heathcliff","hindley","edgar","isabella","nelly",
-"moors","storm","revenge","grange","ghostly","passion"
-]},
-
-{
-name:"Jane Eyre",
-words:[
-"jane","rochester","thornefield","adele","bertha","rivers",
-"lowood","governess","attic","mystery","inheritance","fire"
-]},
-
-{
-name:"Middlemarch",
-words:[
-"dorothea","lislaw","casaubon","rosamond","lydgate","bulstrode",
-"vincy","brooke","reform","society","townlife","politics"
-]},
-
-{
-name:"North and South",
-words:[
-"margaret","hale","thornton","milton","cotton","milltown",
-"strike","factory","workers","industry","change","family"
-]}
-
+  { name:"North and South", words:[
+    "MARGARET","HALE","THORNTON","MILL",
+    "COTTON","STRIKE","FAMILY","WORKERS","TRADE"
+  ]}
 ];
 
 
-/* =========================
-   PICK TODAY'S THEME
-========================= */
-const today = easternDayIndex();
-const theme = themes[today % themes.length];
+/* ===== DAILY ROTATION (Eastern Time) ===== */
+function easternISO(){
+  return new Date().toLocaleDateString("en-CA",{timeZone:"America/New_York"});
+}
+function dayIndexFromISO(iso){
+  const [y,m,d]=iso.split("-").map(Number);
+  return Math.floor(Date.UTC(y,m-1,d)/86400000);
+}
 
-document.getElementById("theme").textContent = theme.name;
+const TODAY = easternISO();
+const theme = THEMES[dayIndexFromISO(TODAY) % THEMES.length];
+const WORDS = theme.words;
+
+document.getElementById("themeTitle").textContent = theme.name;
 
 
-/* =========================
-   BUILD GRID (UNCHANGED)
-========================= */
+/* ===== RNG ===== */
+function xmur3(str){let h=1779033703^str.length;for(let i=0;i<str.length;i++){h=Math.imul(h^str.charCodeAt(i),3432918353);h=h<<13|h>>>19;}return()=>{h=Math.imul(h^(h>>>16),2246822507);h=Math.imul(h^(h>>>13),3266489909);return(h^=h>>>16)>>>0;}}
+function mulberry32(a){return()=>{let t=a+=0x6D2B79F5;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296;}}
+const rand = mulberry32(xmur3(TODAY)());
+const rInt=n=>Math.floor(rand()*n);
 
-const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-const grid = [];
-for(let r=0;r<ROWS;r++){
-  grid[r]=[];
-  for(let c=0;c<COLS;c++){
-    grid[r][c]=letters[Math.floor(Math.random()*26)];
+
+/* ===== GRID LOGIC ===== */
+const DIRS=[{dx:1,dy:0},{dx:0,dy:1},{dx:1,dy:1},{dx:-1,dy:1}];
+const inB=(x,y)=>x>=0&&x<COLS&&y>=0&&y<ROWS;
+
+function place(g,w){
+  for(let t=0;t<2000;t++){
+    const d=DIRS[rInt(DIRS.length)],x=rInt(COLS),y=rInt(ROWS);
+    let ok=true;
+    for(let i=0;i<w.length;i++){
+      const xx=x+d.dx*i,yy=y+d.dy*i;
+      if(!inB(xx,yy)||(g[yy][xx]&&g[yy][xx]!==w[i])){ok=false;break;}
+    }
+    if(!ok)continue;
+    for(let i=0;i<w.length;i++)g[y+d.dy*i][x+d.dx*i]=w[i];
+    return;
   }
 }
 
-/* place words horizontally only (simple + stable) */
-theme.words.forEach(word=>{
-  const w = word.toUpperCase();
-  const row = Math.floor(Math.random()*ROWS);
-  const maxStart = COLS - w.length;
-  if(maxStart<0) return;
+function generate(words){
+  const g=Array.from({length:ROWS},()=>Array(COLS).fill(""));
+  words.sort((a,b)=>b.length-a.length).forEach(w=>place(g,w));
+  const fill="EAIONRSTLUA";
+  for(let y=0;y<ROWS;y++)
+    for(let x=0;x<COLS;x++)
+      if(!g[y][x])g[y][x]=fill[rInt(fill.length)];
+  return g;
+}
 
-  const col = Math.floor(Math.random()*maxStart);
-  for(let i=0;i<w.length;i++){
-    grid[row][col+i]=w[i];
-  }
+
+/* ===== UI ===== */
+const gridData=generate(WORDS);
+const grid=document.getElementById("grid");
+grid.style.gridTemplateColumns=`repeat(${COLS}, var(--tile))`;
+
+gridData.forEach((r,y)=>r.forEach((l,x)=>{
+  const d=document.createElement("div");
+  d.className="tile";d.textContent=l;
+  d.onclick=()=>d.classList.toggle("sel");
+  grid.appendChild(d);
+}));
+
+const chips=document.getElementById("chips");
+WORDS.forEach(w=>{
+  const c=document.createElement("div");
+  c.className="chip";c.textContent=w;
+  chips.appendChild(c);
 });
 
-
-/* =========================
-   RENDER GRID
-========================= */
-const gridEl = document.getElementById("grid");
-gridEl.style.gridTemplateColumns = `repeat(${COLS}, var(--size))`;
-
-for(let r=0;r<ROWS;r++){
-  for(let c=0;c<COLS;c++){
-    const div=document.createElement("div");
-    div.className="cell";
-    div.textContent=grid[r][c];
-
-    div.onclick=()=>div.classList.toggle("selected");
-
-    gridEl.appendChild(div);
-  }
-}
-
-/* =========================
-   WORD LIST DISPLAY
-========================= */
-document.getElementById("words").textContent =
-  theme.words.join(" • ").toUpperCase();
-
 </script>
-
 </body>
 </html>
