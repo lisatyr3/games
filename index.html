@@ -7,142 +7,93 @@
 
 <style>
 :root{
- --tile:46px;
- --gap:10px;
+ --tile:42px;
+ --gap:8px;
  --border:#d9d9d9;
  --selected:#cfe8ff;
  --found:#bfe6c6;
- --primary:#bfe6c6;
- --secondary:#e7e7e7;
  --max:1100px;
 }
 
 body{
  margin:0;
- font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+ font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
 }
 
 .wrap{
  max-width:var(--max);
  margin:0 auto;
- padding:28px 18px 40px;
+ padding:24px;
 }
 
-h1{ margin:0 0 6px; font-size:44px; }
-.sub{ margin:0 0 18px; color:#444; font-size:18px; }
-
-/* =============================
-   DESKTOP LAYOUT
-============================= */
+/* layout */
 .layout{
  display:flex;
  gap:26px;
  align-items:flex-start;
 }
 
-.side{
- width:320px;
- flex-shrink:0;
+@media(max-width:768px){
+ .layout{ display:block; }
 }
 
-/* =============================
-   MOBILE FIX (THE IMPORTANT PART)
-   We SWITCH TO BLOCK LAYOUT
-============================= */
-@media (max-width: 768px){
-
- .layout{
-   display:block;   /* <<< this is the magic */
- }
-
- .grid{
-   margin-bottom:25px;
- }
-
- .side{
-   width:100%;
-   max-width:none;
- }
-}
-
-/* =============================
-   GRID
-============================= */
+/* grid */
 .grid{
  display:grid;
  gap:var(--gap);
  justify-content:center;
  user-select:none;
+ margin-bottom:25px;
 }
 
 .tile{
  width:var(--tile);
  height:var(--tile);
  border:1px solid var(--border);
- border-radius:10px;
+ border-radius:8px;
  display:flex;
  align-items:center;
  justify-content:center;
- font-weight:800;
- font-size:20px;
+ font-weight:700;
  cursor:pointer;
 }
 
-.tile.sel{ background:var(--selected); }
-.tile.found{ background:var(--found); }
+.tile.sel{background:#cfe8ff;}
+.tile.found{background:#bfe6c6;}
 
-/* =============================
-   WORD LIST
-============================= */
+.side{width:320px;}
+@media(max-width:768px){ .side{width:100%;} }
+
 .chips{
  display:flex;
  flex-wrap:wrap;
- gap:10px;
- margin-bottom:14px;
+ gap:8px;
 }
 
 .chip{
- padding:10px 14px;
+ padding:6px 12px;
  border-radius:999px;
- border:1px solid #d0d0d0;
- font-weight:800;
- font-size:14px;
+ border:1px solid #ccc;
+ font-weight:700;
 }
 
 .chip.found{
- background:var(--found);
- border-color:transparent;
+ background:#bfe6c6;
+ border:none;
 }
-
-/* =============================
-   CONTROLS
-============================= */
-.controls{ display:flex; gap:12px; margin:12px 0; }
 
 button{
- border:0;
- border-radius:10px;
- padding:12px 16px;
- font-weight:800;
- font-size:16px;
+ padding:10px 14px;
+ border:none;
+ border-radius:8px;
+ font-weight:bold;
  cursor:pointer;
 }
+.primary{background:#bfe6c6;}
+.secondary{background:#e7e7e7;}
 
-.primary{ background:var(--primary); }
-.secondary{ background:#d7efe3; }
-
-.status{ font-size:18px; font-weight:900; }
-
-/* =============================
-   SMALL PHONES – shrink tiles only
-============================= */
-@media (max-width:520px){
- :root{
-  --tile:24px;
-  --gap:4px;
- }
-
- .tile{ font-size:13px; }
+@media(max-width:520px){
+ :root{ --tile:26px; --gap:4px; }
 }
 </style>
 </head>
@@ -151,39 +102,158 @@ button{
 <div class="wrap">
 
 <h1 id="themeTitle">Daily Word Search</h1>
-<p class="sub">
-Tap letters in a straight line (up, down, left, right, or diagonal), then tap <b>Check</b>.
-</p>
+<p>Tap letters in a straight line, then tap <b>Check</b>.</p>
 
 <div class="layout">
 
 <div id="grid" class="grid"></div>
 
-<aside class="side">
+<div class="side">
 <h2>Find these words</h2>
 <div id="chips" class="chips"></div>
 
-<div class="controls">
+<div style="margin:14px 0">
 <button id="checkBtn" class="primary">Check</button>
 <button id="clearBtn" class="secondary">Clear</button>
 </div>
 
-<div id="status" class="status"></div>
-</aside>
+<div id="status"></div>
+</div>
 
 </div>
 </div>
 
 <script>
 
-/* EVERYTHING BELOW IS 100% YOUR ORIGINAL GAME LOGIC */
-/* NOTHING CHANGED HERE */
+/* ========= 21 THEMES ========= */
 
-/* (paste your existing JS exactly as-is here — no changes needed) */
+const THEMES = [
+{ name:"Valentine’s Day", words:["ROSES","HEART","CANDY","LOVE","CARDS","FLOWERS","KISS","HUG"]},
+{ name:"Solar System", words:["EARTH","MARS","VENUS","JUPITER","SATURN","PLUTO","MOON","COMET"]},
+{ name:"Dogs", words:["PUPPY","LEASH","BARK","FETCH","TAIL","PAWS","COLLAR","TREAT"]},
+{ name:"Cats", words:["KITTEN","PURR","WHISKERS","CLAW","NAP","MEOW","LITTER","TOYS"]},
+{ name:"Vacation", words:["HOTEL","SUITCASE","BEACH","PLANE","TRIP","CRUISE","SUNSCREEN","MAP"]},
+{ name:"Cruise", words:["SHIP","DECK","PORT","CABIN","ANCHOR","OCEAN","BUFFET","SAIL"]},
+{ name:"Hot Dogs", words:["BUN","KETCHUP","MUSTARD","RELISH","ONION","CHILI","FRANK","GRILL"]},
+{ name:"Eyes", words:["IRIS","LASHES","PUPIL","BLINK","VISION","TEARS","BROW","LENS"]},
+{ name:"Airplane", words:["WING","ENGINE","SEAT","PILOT","RUNWAY","CABIN","WINDOW","ALTITUDE"]},
+{ name:"Night Sounds", words:["CRICKET","OWL","WIND","RUSTLE","SNORE","FROG","WHISPER","HOWL"]},
+{ name:"Black & White", words:["ZEBRA","PANDA","OREO","TUXEDO","SKUNK","CHESS","DALMATIAN","MAGPIE"]},
+{ name:"Things That Melt", words:["ICE","BUTTER","CHEESE","CANDLE","SNOW","CHOCOLATE","WAX","MARSHMALLOW"]},
+{ name:"Seashore", words:["SHELL","SAND","WAVES","SEAGULL","STARFISH","TIDE","DRIFTWOOD","BEACH"]},
+{ name:"Salty Snacks", words:["PRETZEL","CHIPS","POPCORN","CRACKERS","PEANUTS","PICKLES","FRIES","NUTS"]},
+{ name:"Pairs", words:["SOCKS","GLOVES","SHOES","EARRINGS","TWINS","SCISSORS","CHOPSTICKS","MITTENS"]},
+{ name:"Pasta", words:["SPAGHETTI","PENNE","RAVIOLI","LASAGNA","MACARONI","FETTUCCINE","SAUCE","NOODLES"]},
+{ name:"Packing", words:["CLOTHES","TOOTHBRUSH","PASSPORT","PHONE","BOOK","JACKET","SHOES","HAT"]},
+{ name:"Disney Villains", words:["URSULA","SCAR","MALeficent".toUpperCase(),"HADES","JAFAR","HOOK","CRUELLA","GASTON"]},
+{ name:"Office Supplies", words:["PAPER","PEN","STAPLER","TAPE","FOLDER","MARKER","DESK","CALENDAR"]},
+{ name:"Farm Animals", words:["COW","PIG","HORSE","SHEEP","GOAT","CHICKEN","DUCK","BARN"]},
+{ name:"Up or Down", words:["STAIRS","ELEVATOR","LADDER","HILL","ESCALATOR","ROOF","BASEMENT","BALLOON"]}
+];
+
+
+/* ========= DAILY THEME ROTATION ========= */
+
+function easternISO(){
+ return new Date().toLocaleDateString("en-CA",{timeZone:"America/New_York"});
+}
+function dayIndexFromISO(iso){
+ const [y,m,d]=iso.split("-").map(Number);
+ return Math.floor(Date.UTC(y,m-1,d)/86400000);
+}
+
+const TODAY=easternISO();
+const dayIndex=dayIndexFromISO(TODAY);
+const theme=THEMES[dayIndex % THEMES.length];
+const WORDS=theme.words;
+
+document.getElementById("themeTitle").textContent=theme.name;
+
+
+/* ========= GAME LOGIC ========= */
+
+const COLS=14, ROWS=11;
+const grid=document.getElementById("grid");
+const chips=document.getElementById("chips");
+const status=document.getElementById("status");
+
+grid.style.gridTemplateColumns=`repeat(${COLS}, var(--tile))`;
+
+const fill="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+function rInt(n){return Math.floor(Math.random()*n);}
+
+const gridData=Array.from({length:ROWS},()=>Array(COLS).fill(""));
+
+const DIRS=[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]];
+
+function canPlace(w,x,y,dx,dy){
+ for(let i=0;i<w.length;i++){
+  const nx=x+dx*i, ny=y+dy*i;
+  if(nx<0||ny<0||nx>=COLS||ny>=ROWS|| (gridData[ny][nx] && gridData[ny][nx]!==w[i])) return false;
+ }
+ return true;
+}
+
+function placeWord(w){
+ for(let t=0;t<500;t++){
+  const [dx,dy]=DIRS[rInt(DIRS.length)];
+  const x=rInt(COLS), y=rInt(ROWS);
+  if(!canPlace(w,x,y,dx,dy)) continue;
+  for(let i=0;i<w.length;i++) gridData[y+dy*i][x+dx*i]=w[i];
+  return;
+ }
+}
+
+WORDS.forEach(w=>placeWord(w));
+
+for(let y=0;y<ROWS;y++)
+ for(let x=0;x<COLS;x++)
+  if(!gridData[y][x]) gridData[y][x]=fill[rInt(fill.length)];
+
+gridData.forEach((r,y)=>r.forEach((l,x)=>{
+ const d=document.createElement("div");
+ d.className="tile";
+ d.textContent=l;
+ d.onclick=()=>tap(x,y,d);
+ grid.appendChild(d);
+}));
+
+WORDS.forEach(w=>{
+ const c=document.createElement("div");
+ c.className="chip";
+ c.id="w-"+w;
+ c.textContent=w;
+ chips.appendChild(c);
+});
+
+let sel=[], found=new Set();
+
+function tap(x,y,e){
+ sel.push({x,y,e});
+ e.classList.add("sel");
+}
+
+document.getElementById("checkBtn").onclick=()=>{
+ const word=sel.map(s=>gridData[s.y][s.x]).join("");
+ const rev=word.split("").reverse().join("");
+ const hit=WORDS.find(w=>!found.has(w)&&(w===word||w===rev));
+ if(!hit) return;
+ found.add(hit);
+ sel.forEach(s=>s.e.classList.add("found"));
+ document.getElementById("w-"+hit).classList.add("found");
+ sel=[];
+};
+
+document.getElementById("clearBtn").onclick=()=>{
+ sel.forEach(s=>s.e.classList.remove("sel"));
+ sel=[];
+};
 
 </script>
 </body>
 </html>
+
 
 
 
