@@ -31,27 +31,12 @@ body{
 h1{ margin:0 0 6px; font-size:44px; }
 .sub{ margin:0 0 18px; color:#444; font-size:18px; }
 
-/* ===== DESKTOP LAYOUT ===== */
 .layout{
  display:flex;
  gap:26px;
  align-items:flex-start;
 }
 
-/* ⭐⭐⭐ THIS FIXES IPAD / PHONE ⭐⭐⭐ */
-@media (max-width:768px){
- .layout{
-   flex-direction:column;
-   align-items:center;
- }
-
- .side{
-   width:100%;
-   max-width:520px;
- }
-}
-
-/* ===== GRID ===== */
 .grid{
  display:grid;
  gap:var(--gap);
@@ -70,7 +55,6 @@ h1{ margin:0 0 6px; font-size:44px; }
  font-weight:800;
  font-size:20px;
  cursor:pointer;
- touch-action:none;
 }
 
 .tile.sel{ background:var(--selected); }
@@ -113,13 +97,38 @@ button{
 .secondary{ background:#d7efe3; }
 
 .status{ font-size:18px; font-weight:900; }
+
+/* ===== STACK ON MOBILE ===== */
+@media (max-width:768px){
+ .layout{
+  flex-direction:column;
+  align-items:center;
+ }
+ .side{
+  width:100%;
+  max-width:520px;
+ }
+}
+
+/* ===== CRITICAL MOBILE FIX (restores old behavior) ===== */
+@media (max-width:520px){
+ :root{
+  --tile:24px;
+  --gap:4px;
+ }
+
+ h1{ font-size:32px; }
+ .sub{ font-size:15px; }
+ .tile{ font-size:13px; }
+}
 </style>
 </head>
 
 <body>
-
 <div class="wrap">
+
 <h1 id="themeTitle">Daily Word Search</h1>
+
 <p class="sub">
 Tap letters in a straight line (up, down, left, right, or diagonal), then tap <b>Check</b>.
 </p>
@@ -129,6 +138,7 @@ Tap letters in a straight line (up, down, left, right, or diagonal), then tap <b
 
 <aside class="side">
 <h2>Find these words</h2>
+
 <div id="chips" class="chips"></div>
 
 <div class="controls">
@@ -147,37 +157,58 @@ Tap letters in a straight line (up, down, left, right, or diagonal), then tap <b
 const COLS = 14;
 const ROWS = 11;
 
+
 /* ======================================================
-   ✅ 21 THEMES ONLY (nothing else changed)
-   ====================================================== */
+   21 DAILY THEMES
+====================================================== */
 const THEMES = [
 
-{ name:"Valentine’s Day", words:["HEART","ROSES","CANDY","KISS","HUGS","LOVE","CARDS","DATE","FLOWERS","CUPID"] },
-{ name:"The Solar System", words:["SUN","EARTH","MARS","VENUS","SATURN","JUPITER","NEPTUNE","MERCURY","URANUS","ORBIT"] },
-{ name:"Man’s Best Friend", words:["DOG","PUPPY","LEASH","PAWS","FETCH","BARK","COLLAR","KENNEL","TREATS","TAIL"] },
-{ name:"The Cat’s Meow", words:["CAT","KITTEN","PURR","WHISKERS","LITTER","SCRATCH","NAP","MEOW","FELINE","TAILS"] },
-{ name:"Vacation Vibes", words:["BEACH","HOTEL","RELAX","SUNSET","TRAVEL","SUITCASE","RESORT","SAND","POOL","CRUISE"] },
-{ name:"Cruise Control", words:["SHIP","CABIN","DECK","PORT","OCEAN","ANCHOR","SAIL","BUFFET","CAPTAIN","VOYAGE"] },
-{ name:"Hot Dog Toppings", words:["MUSTARD","KETCHUP","RELISH","ONIONS","CHILI","CHEESE","PICKLES","BACON","SLAW","JALAPENO"] },
-{ name:"The Eyes Have It", words:["VISION","BLINK","GLASSES","OPTIC","PUPIL","RETINA","FOCUS","SIGHT","IRIS","LENS"] },
-{ name:"Parts of an Airplane", words:["WING","ENGINE","COCKPIT","TAIL","FLAPS","RUDDER","SEAT","WINDOW","AISLE","GEAR"] },
-{ name:"Heard at Night", words:["OWL","CRICKETS","BREEZE","WHISPER","SIREN","THUNDER","WIND","SNORE","RAIN","HOWL"] },
-{ name:"Black and White", words:["ZEBRA","PANDA","OREO","SKUNK","CHESS","DOMINO","MAGPIE","TUXEDO","YIN","DALMATIAN"] },
-{ name:"Things That Melt", words:["ICE","BUTTER","CANDLE","WAX","CHOCOLATE","CHEESE","SNOW","FROST","SOAP","MARSHMALLOW"] },
-{ name:"Found on the Seashore", words:["SHELL","DRIFTWOOD","CRAB","SAND","SEAWEED","PEBBLE","STARFISH","FOAM","WAVES","TIDE"] },
-{ name:"Salty Snacks", words:["PRETZEL","POPCORN","CHIPS","NUTS","CRACKERS","PICKLES","FRIES","JERKY","SALSA","DIP"] },
-{ name:"They Came In Pairs", words:["SOCKS","SHOES","GLOVES","MITTENS","EARRINGS","TWINS","SCISSORS","PANTS","SKATES","DICE"] },
-{ name:"Pasta, Baby!", words:["SPAGHETTI","PENNE","RAVIOLI","LASAGNA","FETTUCCINE","MACARONI","SAUCE","MEATBALL","PARMESAN","NOODLE"] },
-{ name:"Packing List", words:["SHIRT","PANTS","SOCKS","TOOTHBRUSH","PHONE","CHARGER","BOOK","HAT","JACKET","SHOES"] },
-{ name:"Disney Villains", words:["URSULA","SCAR","JAFAR","HOOK","MALEFICENT","CRUELLA","HADES","GASTON","QUEEN","DRFACILIER"] },
-{ name:"Office Supplies", words:["PEN","PENCIL","PAPER","STAPLER","FOLDER","SCISSORS","TAPE","CLIPS","MARKER","DESK"] },
-{ name:"Farm Animals", words:["COW","PIG","HORSE","GOAT","SHEEP","CHICKEN","DUCK","BARN","HAY","ROOSTER"] },
-{ name:"Going Up or Down?", words:["STAIRS","ELEVATOR","ESCALATOR","LIFT","RAMP","HILL","SLIDE","LADDER","STAIRCASE","STEP"] }
+{ name:"Valentine’s Day", words:["HEART","ROSES","CANDY","CARDS","FLOWERS","KISSES","CUPID","LOVE","DATE","CHOCOLATE"] },
+
+{ name:"The Solar System", words:["MERCURY","VENUS","EARTH","MARS","JUPITER","SATURN","URANUS","NEPTUNE","COMET","ASTEROID"] },
+
+{ name:"Man’s Best Friend", words:["LABRADOR","POODLE","BEAGLE","TERRIER","COLLIE","HUSKY","RETRIEVER","KENNEL","LEASH","PAWS"] },
+
+{ name:"The Cat’s Meow", words:["KITTEN","WHISKERS","TAIL","PAWS","PURRING","SCRATCH","LITTER","MEOW","NAP","FELINE"] },
+
+{ name:"Vacation Vibes", words:["SUNSCREEN","BEACH","HOTEL","CAMERA","RELAX","TOWEL","SANDALS","BOARDWALK","POOL","SUITCASE"] },
+
+{ name:"Cruise Control", words:["SHIP","CABIN","DECK","ANCHOR","PORT","OCEAN","SAIL","BUFFET","CAPTAIN","HARBOR"] },
+
+{ name:"Hot Dog Toppings", words:["MUSTARD","KETCHUP","RELISH","ONIONS","CHILI","CHEESE","SAUERKRAUT","BACON","PICKLES","SLAW"] },
+
+{ name:"The Eyes Have It", words:["IRIS","PUPIL","LENSES","VISION","BLINK","EYELASH","FOCUS","GLASSES","RETINA","OPTIC"] },
+
+{ name:"Parts of an Airplane", words:["WING","COCKPIT","ENGINE","LANDING","FLAPS","TAIL","RUNWAY","CABIN","PILOT","ALTITUDE"] },
+
+{ name:"Heard at Night", words:["CRICKETS","OWL","WIND","THUNDER","WHISTLE","SNORE","BREEZE","FROGS","RAIN","ECHO"] },
+
+{ name:"Black and White", words:["ZEBRA","PANDA","CHESS","OREO","TUXEDO","NEWSPAPER","PENGUIN","SKUNK","DALMATIAN","MAGPIE"] },
+
+{ name:"Things That Melt", words:["ICE","BUTTER","CHEESE","CANDLE","WAX","CHOCOLATE","SNOW","MARSHMALLOW","SOAP","GLUE"] },
+
+{ name:"Found on the Seashore", words:["SHELLS","STARFISH","DRIFTWOOD","CRAB","SEAWEED","SAND","PEBBLES","SEAGULL","TIDE","ANCHOR"] },
+
+{ name:"Salty Snacks", words:["PRETZEL","CHIPS","POPCORN","NUTS","CRACKERS","PICKLES","FRIES","BACON","JERKY","CHEX"] },
+
+{ name:"They Came In Pairs", words:["SOCKS","GLOVES","SHOES","MITTENS","EARRINGS","TWINS","BATTERIES","CHOPSTICKS","SKATES","SLEEVES"] },
+
+{ name:"Pasta, Baby!", words:["SPAGHETTI","LASAGNA","RAVIOLI","PENNE","ZITI","FETTUCCINE","MACARONI","SAUCE","MEATBALL","GARLIC"] },
+
+{ name:"Packing List", words:["SUITCASE","PASSPORT","TOOTHBRUSH","SHOES","CHARGER","JACKET","MAP","BOOK","HAT","CAMERA"] },
+
+{ name:"Disney Villains", words:["URSULA","SCAR","JAFAR","MALEFICENT","CRUELLA","HADES","HOOK","GASTON","SHAN","EVILQUEEN"] },
+
+{ name:"Office Supplies", words:["PAPER","STAPLER","PENS","CLIPS","FOLDER","SCISSORS","TAPE","PRINTER","MARKER","BINDER"] },
+
+{ name:"Farm Animals", words:["COW","PIG","HORSE","CHICKEN","SHEEP","GOAT","DONKEY","ROOSTER","BARN","TRACTOR"] },
+
+{ name:"Going Up or Down?", words:["ELEVATOR","STAIRS","ESCALATOR","LADDER","LIFT","SLIDE","HILL","RAMP","ROPE","BALLOON"] }
 
 ];
 
 
-/* ===== DAILY ROTATION (UNCHANGED) ===== */
+/* ===== DATE ROTATION ===== */
 function easternISO(){
  return new Date().toLocaleDateString("en-CA",{timeZone:"America/New_York"});
 }
@@ -187,19 +218,22 @@ function dayIndexFromISO(iso){
 }
 
 const TODAY = easternISO();
-const theme = THEMES[dayIndexFromISO(TODAY) % THEMES.length];
+const dayIndex = dayIndexFromISO(TODAY);
+const theme = THEMES[dayIndex % THEMES.length];
 const WORDS = theme.words;
 
 document.getElementById("themeTitle").textContent = theme.name;
 document.title = theme.name + " Word Search";
 
-/* ===== EVERYTHING ELSE IS YOUR ORIGINAL WORKING LOGIC ===== */
+
+/* ===== ORIGINAL GAME LOGIC (UNCHANGED) ===== */
+
 function xmur3(str){let h=1779033703^str.length;for(let i=0;i<str.length;i++){h=Math.imul(h^str.charCodeAt(i),3432918353);h=h<<13|h>>>19;}return()=>{h=Math.imul(h^(h>>>16),2246822507);h=Math.imul(h^(h>>>13),3266489909);return(h^=h>>>16)>>>0;}}
 function mulberry32(a){return()=>{let t=a+=0x6D2B79F5;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296;}}
 
-const seedFn=xmur3(TODAY);
-let rand=mulberry32(seedFn());
-const rInt=n=>Math.floor(rand()*n);
+const seedFn = xmur3(TODAY);
+let rand = mulberry32(seedFn());
+const rInt = n => Math.floor(rand()*n);
 
 const DIRS=[{dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1},{dx:1,dy:1},{dx:-1,dy:-1},{dx:1,dy:-1},{dx:-1,dy:1}];
 const inB=(x,y)=>x>=0&&x<COLS&&y>=0&&y<ROWS;
@@ -225,7 +259,9 @@ function generate(words){
  const g=Array.from({length:ROWS},()=>Array(COLS).fill(""));
  words.sort((a,b)=>b.length-a.length).forEach(w=>placeWord(g,w));
  const fill="EAIONRSTLUAENRSTL";
- for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++)if(!g[y][x])g[y][x]=fill[rInt(fill.length)];
+ for(let y=0;y<ROWS;y++)
+  for(let x=0;x<COLS;x++)
+   if(!g[y][x])g[y][x]=fill[rInt(fill.length)];
  return g;
 }
 
