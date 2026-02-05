@@ -29,13 +29,19 @@ body{
 }
 
 h1{ margin:0 0 6px; font-size:44px; }
-
 .sub{ margin:0 0 18px; color:#444; font-size:18px; }
 
-.layout{ display:flex; gap:26px; align-items:flex-start; }
+.layout{
+  display:flex;
+  gap:26px;
+  align-items:flex-start;
+}
 
 @media (max-width: 768px){
-  .layout{ flex-direction: column; align-items: center; }
+  .layout{
+    flex-direction: column;
+    align-items: center;
+  }
 }
 
 .grid{
@@ -64,6 +70,7 @@ h1{ margin:0 0 6px; font-size:44px; }
 .tile.found{ background:var(--found); }
 
 .side{ width:320px; }
+
 @media (max-width: 768px){
   .side{ width:100%; max-width:520px; }
 }
@@ -90,7 +97,11 @@ h1{ margin:0 0 6px; font-size:44px; }
   border-color:transparent;
 }
 
-.controls{ display:flex; gap:12px; margin:12px 0; }
+.controls{
+  display:flex;
+  gap:12px;
+  margin:12px 0;
+}
 
 button{
   border:0;
@@ -104,10 +115,16 @@ button{
 .primary{ background:var(--primary); }
 .secondary{ background:#d7efe3; }
 
-.status{ font-size:18px; font-weight:900; }
+.status{
+  font-size:18px;
+  font-weight:900;
+}
 
 @media (max-width: 520px){
-  :root{ --tile:24px; --gap:4px; }
+  :root{
+    --tile:24px;
+    --gap:4px;
+  }
   h1{ font-size:32px; }
   .sub{ font-size:15px; }
   .tile{ font-size:13px; }
@@ -119,7 +136,8 @@ button{
 <div class="wrap">
   <h1 id="themeTitle">Daily Word Search</h1>
   <p class="sub">
-    Tap letters in a straight line (up, down, left, right, or diagonal), then tap <b>Check</b>.
+    Tap letters in a straight line (up, down, left, right, or diagonal),
+    then tap <b>Check</b>.
   </p>
 
   <div class="layout">
@@ -144,29 +162,36 @@ button{
 const COLS = 14;
 const ROWS = 11;
 
-/* ===== THEMES (ONLY THING UPDATED: now 21) ===== */
+/* ===== THEMES ===== */
 const THEMES = [
-  { name:"Valentine’s Day", words:["VALENTINE","HEARTS","ROSES","CANDY","CARDS","FLOWERS","SWEET","HUGS","KISSES","CUPID"] },
-  { name:"The Solar System", words:["MERCURY","VENUS","EARTH","MARS","JUPITER","SATURN","URANUS","NEPTUNE","PLUTO","COMETS"] },
-  { name:"Man’s Best Friend", words:["PUPPY","LEASH","COLLAR","FETCH","BARKING","TREAT","WAGGING","KENNEL","WALKER","GROOMER"] },
-  { name:"The Cat’s Meow", words:["KITTEN","PURRING","WHISKERS","SCRATCH","CATNIP","LITTER","MEOWING","PAWS","CLIMBER","TABBY"] },
-  { name:"Vacation Vibes", words:["SUITCASE","HOTEL","BEACH","PASSPORT","CAMERA","SUNSCREEN","TOURIST","RESORT","TRAVEL","RELAX"] },
-  { name:"Cruise Control", words:["SHIP","CABIN","DECK","PORT","SAILING","OCEAN","ANCHOR","BUFFET","SUNSET","ISLAND"] },
-  { name:"Hot Dog Toppings", words:["MUSTARD","KETCHUP","RELISH","ONIONS","CHILI","CHEESE","PICKLES","SAUERKRAUT","PEPPERS","BACON"] },
-  { name:"The Eyes Have It", words:["VISION","PUPIL","IRIS","LASHES","BLINK","BROW","LENS","GLASSES","RETINA","TEARS"] },
-  { name:"Parts of an Airplane", words:["WING","ENGINE","RUNWAY","PILOT","CABIN","FUSELAGE","WINDOW","FLAPS","TAILFIN","ALTITUDE"] },
-  { name:"Heard at Night", words:["CRICKETS","OWL","WHISPER","WIND","RUSTLING","SNORING","FROGS","HOOTING","SILENCE","HOWLING"] },
-  { name:"Black and White", words:["ZEBRA","PANDA","OREO","TUXEDO","SKUNK","CHESS","DOMINO","PEPPER","MAGPIE","DALMATIAN"] },
-  { name:"Things That Melt", words:["ICECUBE","BUTTER","CHOCOLATE","CANDLE","SNOW","CHEESE","WAX","MARSHMALLOW","GELATO","FROSTING"] },
-  { name:"Found on the Seashore", words:["SEASHELL","SAND","STARFISH","SEAGULL","TIDE","DRIFTWOOD","PEBBLES","WAVES","CORAL","DUNES"] },
-  { name:"Salty Snacks", words:["PRETZEL","POPCORN","CHIPS","CRACKERS","PEANUTS","PICKLES","NACHOS","JERKY","ALMONDS","CASHEWS"] },
-  { name:"They Came In Pairs", words:["SOCKS","GLOVES","EARRINGS","SHOES","TWINS","CHOPSTICKS","MITTENS","SCISSORS","PARENTS","BUNS"] },
-  { name:"Pasta, Baby!", words:["SPAGHETTI","PENNE","RAVIOLI","LASAGNA","NOODLES","FETTUCCINE","MARINARA","ALFREDO","MEATBALLS","PARMESAN"] },
-  { name:"Packing List", words:["TOOTHBRUSH","JACKET","MEDICINE","CHARGER","BOOK","CLOTHES","SHOES","HAT","WALLET","TICKETS"] },
-  { name:"Disney Villains", words:["URSULA","SCAR","MALEFICENT","JAFAR","HADES","CRUELLA","GASTON","HOOK","GOTHEL","QUEEN"] },
-  { name:"Office Supplies", words:["PAPER","STAPLER","PENCILS","HIGHLIGHTER","FOLDERS","NOTEBOOK","TAPE","CLIPS","MARKERS","CALENDAR"] },
-  { name:"Farm Animals", words:["CHICKEN","HORSE","DONKEY","COW","PIG","SHEEP","GOAT","DUCK","TURKEY","BARN"] },
-  { name:"Going Up or Down?", words:["STAIRS","ELEVATOR","LADDER","ESCALATOR","HILLTOP","BASEMENT","ATTIC","BALLOON","DIVE","CLIMB"] }
+  {
+    name:"American Cities",
+    words:["NEWYORK","CHICAGO","DALLAS","DENVER","ATLANTA","MIAMI","SEATTLE","BOSTON","PHOENIX","PORTLAND","AUSTIN","ORLANDO"]
+  },
+  {
+    name:"Famous Scientists",
+    words:["EINSTEIN","NEWTON","GALILEO","CURIE","DARWIN","TESLA","PASTEUR","FARADAY","KEPLER","BOHR","EDISON","HOOKE"]
+  },
+  {
+    name:"Solar System",
+    words:["SUN","MERCURY","VENUS","EARTH","MARS","JUPITER","SATURN","URANUS","NEPTUNE","PLUTO","ASTEROID","COMET"]
+  },
+  {
+    name:"Childhood Games",
+    words:["HIDESEEK","HOPSCOTCH","MARBLES","TAG","JACKS","TETHERBALL","REDROVER","FREEZE","DODGEBALL","SKIPPING","FOURQUARE","KICKBALL"]
+  },
+  {
+    name:"70s Bands",
+    words:["ABBA","EAGLES","QUEEN","FLEETWOOD","BEEGEES","CHICAGO","AEROSMITH","KISS","JOURNEY","STYX","BOSTON","GENESIS"]
+  },
+  {
+    name:"Dog Breeds",
+    words:["LABRADOR","POODLE","BEAGLE","BOXER","BULLDOG","DALMATIAN","DOBERMAN","HUSKY","SHEPHERD","RETRIEVER","TERRIER","CHIHUAHUA"]
+  },
+  {
+    name:"College Mascots",
+    words:["TIGERS","BULLDOGS","WILDCATS","BEARS","GATORS","BUCKEYES","BADGERS","HOOSIERS","VOLUNTEERS","RAZORBACKS","AGGIES","SPARTANS"]
+  }
 ];
 
 /* ===== EASTERN TIME DATE (MIDNIGHT RESET) ===== */
@@ -177,6 +202,7 @@ function dayIndexFromISO(iso){
   const [y,m,d]=iso.split("-").map(Number);
   return Math.floor(Date.UTC(y,m-1,d)/86400000);
 }
+
 const TODAY = easternISO();
 const dayIndex = dayIndexFromISO(TODAY);
 const theme = THEMES[dayIndex % THEMES.length];
@@ -227,37 +253,29 @@ const grid=document.getElementById("grid");
 const chips=document.getElementById("chips");
 const status=document.getElementById("status");
 
-grid.style.gridTemplateColumns = `repeat(${COLS}, var(--tile))`;
-
+grid.style.gridTemplateColumns=`repeat(${COLS}, var(--tile))`;
 gridData.forEach((r,y)=>r.forEach((l,x)=>{
   const d=document.createElement("div");
-  d.className="tile"; d.textContent=l;
+  d.className="tile";d.textContent=l;
   d.onclick=()=>tap(x,y,d);
   grid.appendChild(d);
 }));
 
 WORDS.forEach(w=>{
   const c=document.createElement("div");
-  c.className="chip"; c.textContent=w; c.id="w-"+w;
+  c.className="chip";c.textContent=w;c.id="w-"+w;
   chips.appendChild(c);
 });
-
-status.textContent = `Found 0 of ${WORDS.length}`;
+status.textContent=`Found 0 of ${WORDS.length}`;
 
 let sel=[],dir=null,found=new Set();
-
-function step(a,b){
-  const dx=b.x-a.x,dy=b.y-a.y;
-  if(Math.abs(dx)>1||Math.abs(dy)>1||(!dx&&!dy))return null;
-  return{dx:Math.sign(dx),dy:Math.sign(dy)};
-}
-
+function step(a,b){const dx=b.x-a.x,dy=b.y-a.y;if(Math.abs(dx)>1||Math.abs(dy)>1||(!dx&&!dy))return null;return{dx:Math.sign(dx),dy:Math.sign(dy)};}
 function tap(x,y,e){
   if(sel.some(s=>s.x===x&&s.y===y))return;
   if(!sel.length){sel=[{x,y,e}];e.classList.add("sel");return;}
   if(sel.length===1){dir=step(sel[0],{x,y});if(!dir)return;}
   else{const s=step(sel[sel.length-1],{x,y});if(!s||s.dx!==dir.dx||s.dy!==dir.dy)return;}
-  sel.push({x,y,e}); e.classList.add("sel");
+  sel.push({x,y,e});e.classList.add("sel");
 }
 
 document.getElementById("checkBtn").onclick=()=>{
@@ -279,9 +297,3 @@ document.getElementById("clearBtn").onclick=()=>{
 </script>
 </body>
 </html>
-
-
-
-
-
-
