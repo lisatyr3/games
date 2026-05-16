@@ -26,6 +26,7 @@ body{
   max-width:var(--max);
   margin:0 auto;
   padding:28px 18px 40px;
+  box-sizing: border-box; /* Prevents padding from forcing horizontal overflow */
 }
 
 h1{ margin:0 0 6px; font-size:44px; }
@@ -49,6 +50,7 @@ h1{ margin:0 0 6px; font-size:44px; }
   gap:var(--gap);
   justify-content:center;
   user-select:none;
+  max-width: 100%; /* Keeps the grid from breaking container limits */
 }
 
 .tile{
@@ -64,6 +66,7 @@ h1{ margin:0 0 6px; font-size:44px; }
   cursor:pointer;
   touch-action:none;
   -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box; /* Ensures borders stay inside the tile size */
 }
 
 .tile.sel{ background:var(--selected); }
@@ -120,14 +123,20 @@ button{
   font-weight:900;
 }
 
+/* ===== FIXED MOBILE STYLES ===== */
 @media (max-width:520px){
   :root{
-    --tile:24px;
-    --gap:4px;
+    /* Dynamic scaling based on mobile screen width (14 columns total) */
+    --tile: 5.8vw; 
+    --gap: 0.8vw;
   }
   h1{ font-size:32px; }
   .sub{ font-size:15px; }
-  .tile{ font-size:13px; }
+  /* Scales the text inside the tile proportionally */
+  .tile{ 
+    font-size: 3vw; 
+    border-radius: 4px; /* Slightly softer borders for small screen tiles */
+  }
 }
 </style>
 </head>
@@ -165,7 +174,7 @@ const ROWS = 11;
 
 
 /* =================================================
-   ✅ ONLY CHANGE: NEW THEMES
+   ONLY CHANGE: NEW THEMES
    ================================================= */
 
 const THEMES = [
